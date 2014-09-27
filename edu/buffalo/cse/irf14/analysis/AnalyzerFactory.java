@@ -58,12 +58,12 @@ public class AnalyzerFactory {
 			case AUTHOR:
 				return new AuthorAnalyzer(stream);
 			case TITLE:
-				return new TitleAnalyzer(stream);
+			case CONTENT:
+				return new TitleAndContentAnalyzer(stream);
 			case AUTHORORG:
 			case PLACE:
 				return new AuthorOrgAndPlaceAnalyzer(stream);
-			case CONTENT:
-				return new ContentAnalyzer(stream);
+			
 			case NEWSDATE:
 				return new NewsDateAnalyzer(stream);
 			default:	

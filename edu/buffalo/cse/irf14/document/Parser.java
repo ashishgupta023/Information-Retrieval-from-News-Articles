@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 /**
  * @author nikhillo
@@ -33,13 +34,11 @@ public class Parser {
 			{
 				
 				BufferedReader br = new BufferedReader(new FileReader(filename));
-				
-				
-				
 				String line;
 				String content = null;
 				//Check on a linux machine
-				String[] tempContent = filename.split("\\\\");
+				StringTokenizer tokenizer = new StringTokenizer(filename,File.separator);
+				String[] tempContent = filename.split("\\"+File.separator);
 				d.setField(FieldNames.CATEGORY, tempContent[tempContent.length-2]);
 				d.setField(FieldNames.FILEID, tempContent[tempContent.length-1]);
 				while ((line = br.readLine()) != null) {
@@ -72,12 +71,19 @@ public class Parser {
 							if(placeDate == true)
 							{
 								int hyphenIndex = line.indexOf("-");
-								String placeDateStr = line.substring(0,hyphenIndex);
-								int tempIndex = placeDateStr.lastIndexOf(",");
-								d.setField(FieldNames.PLACE, placeDateStr.substring(0, tempIndex).trim());
-								d.setField(FieldNames.NEWSDATE, placeDateStr.substring(tempIndex+1, placeDateStr.length()).trim());
-								placeDate = false;
-								content = line.substring(hyphenIndex+1 , line.length());
+								System.out.println("=============" + line);
+								if(hyphenIndex > -1)
+								{
+									String placeDateStr = line.substring(0,hyphenIndex);
+									int tempIndex = placeDateStr.lastIndexOf(",");
+									if(tempIndex > -1)
+									{
+										d.setField(FieldNames.PLACE, placeDateStr.substring(0, tempIndex).trim());
+										d.setField(FieldNames.NEWSDATE, placeDateStr.substring(tempIndex+1, placeDateStr.length()).trim());
+										placeDate = false;
+										content = line.substring(hyphenIndex+1 , line.length());
+									}
+								}
 							}
 							else
 							{

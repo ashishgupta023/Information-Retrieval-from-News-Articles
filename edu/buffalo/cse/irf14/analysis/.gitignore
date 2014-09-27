@@ -27,3 +27,5 @@
 /StopWordFilter.class
 /StopWordFilterException.class
 /CapitalizationFilter.class
+/TitleAndContentAnalyzer.class
+/AccentFilterException.class

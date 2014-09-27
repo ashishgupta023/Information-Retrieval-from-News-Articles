@@ -45,7 +45,7 @@ public class DateFilter extends TokenFilter {
 	}
 	
 	
-	public void searchTime(Token token)
+	public void searchTime(Token token) 
 	{
 		Token testToken = token;
 		String probableTime = testToken.getTermText().toLowerCase();
@@ -109,7 +109,7 @@ public class DateFilter extends TokenFilter {
 
 		if(months.containsKey(testToken.getTermText().toLowerCase().replaceAll(",", "")) )
 		{
-			matchedMonth = months.get(testToken.getTermText().toLowerCase()).toString();
+			matchedMonth = months.get(testToken.getTermText().toLowerCase().replaceAll(",", "")).toString();
 		}
 	}
 	
@@ -265,7 +265,8 @@ public class DateFilter extends TokenFilter {
 	
 	@Override
 	public boolean increment() throws TokenizerException {
-		
+		try
+		{
 		
 		if(filterStream.hasNext())
 		{
@@ -400,13 +401,16 @@ public class DateFilter extends TokenFilter {
 
 				}
 			}
-			
-			
-			
-			
+				
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("--Problem in applying Date Filter--");
 		}
 		
 		return filterStream.hasNext();
+
 	}
 
 	@Override

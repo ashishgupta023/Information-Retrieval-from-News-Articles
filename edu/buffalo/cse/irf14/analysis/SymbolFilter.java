@@ -83,6 +83,8 @@ public class SymbolFilter extends TokenFilter{
 	
 	@Override
 	public boolean increment() throws TokenizerException {
+		try
+		{
 		
 		if(filterStream.hasNext())
 		{
@@ -92,6 +94,11 @@ public class SymbolFilter extends TokenFilter{
 			currToken = trimHyphens(currToken);	
 			
 		
+		}
+		}
+		catch(Exception e)
+		{
+			System.out.println("--Problem in applying Symbol Filter--");
 		}
 		
 		return filterStream.hasNext();

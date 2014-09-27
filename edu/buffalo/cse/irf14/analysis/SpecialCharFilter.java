@@ -26,12 +26,18 @@ public class SpecialCharFilter extends TokenFilter {
 	public boolean increment() throws TokenizerException {
 		
 		
-		
-		if(filterStream.hasNext())
+		try
 		{
-			currToken = filterStream.next();
-			currToken = trimSpecialChars(currToken);
-			
+			if(filterStream.hasNext())
+			{
+				currToken = filterStream.next();
+				currToken = trimSpecialChars(currToken);
+				
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("--Problem in applying Special Character Filter--");
 		}
 		
 		return filterStream.hasNext();

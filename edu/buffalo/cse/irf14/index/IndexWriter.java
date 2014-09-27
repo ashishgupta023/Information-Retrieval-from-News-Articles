@@ -16,12 +16,23 @@ import edu.buffalo.cse.irf14.document.FieldNames;
  * Class responsible for writing indexes to disk
  */
 public class IndexWriter {
+	
+	TokenStream stream ;
+	String[] content ;
+	Tokenizer tokenizer;
+	AnalyzerFactory factory;
+	Analyzer analyzer;
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
 	 */
 	public IndexWriter(String indexDir) {
 		//TODO : YOU MUST IMPLEMENT THIS
+		stream = null;
+		content = null;
+		tokenizer = null;
+		factory = null;
+		analyzer = null;
 	}
 	
 	/**
@@ -35,42 +46,31 @@ public class IndexWriter {
 	 */
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
-		
 		try
-		{
-			
-			
-			/*String[] content = d.getField(FieldNames.AUTHOR);
-			Tokenizer tokenizer = new Tokenizer();
-			TokenStream stream = tokenizer.consume(content[0]);
-			AnalyzerFactory factory = AnalyzerFactory.getInstance();
-			
-			Analyzer analyzer = factory.getAnalyzerForField(FieldNames.AUTHOR, stream);
-			while(analyzer.increment())
-			{
-				
-			}
-			stream = analyzer.getStream();
-			stream.reset();	*/		
-			
-			
+		{	
+			// Index all documents
 			for(FieldNames name : FieldNames.values())
 			{
-				String[] content = d.getField(name);
-				Tokenizer tokenizer = new Tokenizer();
-				TokenStream stream = tokenizer.consume(content[0]);
-				AnalyzerFactory factory = AnalyzerFactory.getInstance();
-				
-				Analyzer analyzer = factory.getAnalyzerForField(name, stream);
-				if(analyzer != null)
+				content  = d.getField(name);
+				tokenizer = new Tokenizer();
+				if(content != null)
 				{
-					while(analyzer.increment())
+					stream  = tokenizer.consume(content[0]);
+				
+					factory = AnalyzerFactory.getInstance();
+				
+					analyzer = factory.getAnalyzerForField(name, stream);
+					if(analyzer != null)
 					{
-						
+						while(analyzer.increment())
+						{
+							
+						}
+						stream = analyzer.getStream();
+						stream.reset();
 					}
 				}
-				stream = analyzer.getStream();
-				stream.reset();
+				
 			}
 			
 		}
