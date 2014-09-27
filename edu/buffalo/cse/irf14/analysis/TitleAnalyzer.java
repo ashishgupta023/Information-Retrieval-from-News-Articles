@@ -22,6 +22,37 @@ public class TitleAnalyzer implements Analyzer {
 	@Override
 	public boolean increment() throws TokenizerException {
 		
+		 
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.ACCENT, this.stream);
+		 if(this.stream != null)
+			{
+				while(this.filter.increment())
+				{
+					
+				}
+			}
+		 this.stream.reset();
+		 
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.STOPWORD, this.stream);
+		 if(this.stream != null)
+			{
+				while(this.filter.increment())
+				{
+					
+				}
+			}
+		 this.stream.reset();
+		 
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.STEMMER, this.stream);
+		 if(this.stream != null)
+			{
+				while(this.filter.increment())
+				{
+					
+				}
+			}
+		 this.stream.reset();
+
 		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.SYMBOL, this.stream);
 
 		if(this.stream != null)
@@ -32,8 +63,11 @@ public class TitleAnalyzer implements Analyzer {
 			}
 		}
 		
-		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.SPECIALCHARS, this.stream);
 		 this.stream.reset();
+
+		
+
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.SPECIALCHARS, this.stream);
 		 if(this.stream != null)
 			{
 				while(this.filter.increment())
@@ -41,6 +75,12 @@ public class TitleAnalyzer implements Analyzer {
 					
 				}
 			}
+
+		 this.stream.reset();
+
+		
+		 
+		
 
 		return false;
 	}

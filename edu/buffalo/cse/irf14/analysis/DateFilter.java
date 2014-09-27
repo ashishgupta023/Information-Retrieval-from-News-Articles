@@ -249,6 +249,18 @@ public class DateFilter extends TokenFilter {
 		}
 		testToken.setTermText(dateToken);
 		testToken.setTermBuffer(dateToken.toCharArray());
+		testToken.setIsDate(true);
+	}
+	
+	public void checkDatePattern(Token token)
+	{
+		if(token.getTermText().toLowerCase().trim().matches("^[0-9]{1,2}[./-][0-9]{1,2}[./-](19|20)\\d\\d$"))
+		{
+			String[] probableDate = token.getTermText().trim().split("[\\.-]");
+			matchedYear = probableDate[2];
+			matchedDate = probableDate[1];
+			matchedMonth = probableDate[0];
+		}
 	}
 	
 	@Override
@@ -265,10 +277,23 @@ public class DateFilter extends TokenFilter {
 			{
 				createDateToken(currToken);
 				nulledDate();
+				return filterStream.hasNext();
 
 			}
 
+			if(matchedYear == null)
+			{
+				checkDatePattern(currToken);
+				if(matchedYear != null)
+				{
+					createDateToken(currToken);
+					nulledDate();
+					return filterStream.hasNext();
 
+				}
+			}
+			
+			
 			//December 1, 1948
 			if(matchedMonth ==  null || matchedMonth.isEmpty() )
 			{
@@ -370,11 +395,12 @@ public class DateFilter extends TokenFilter {
 						currToken = filterStream.previous();
 					createDateToken(currToken);
 					nulledDate();
-
 					return filterStream.hasNext();
+
 
 				}
 			}
+			
 			
 			
 			

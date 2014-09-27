@@ -30,7 +30,7 @@ public class StemmerRuleTest extends TFRuleBaseTest {
 			assertArrayEquals(new String[]{"condit", "oper"},  
 					runTest(TokenFilterType.STEMMER, "conditional operator"));
 			assertArrayEquals(new String[]{"microscop", "replac", "of", "inher", "good"},
-					runTest(TokenFilterType.STEMMER, "microscopic replacement of inherent goodness"));
+					runTest(TokenFilterType.STEMMER, "microscopic replacement of inherent goodness")); 
 			assertArrayEquals(new String[]{"@goodness", "#gracious", "2getherness"}, 
 					runTest(TokenFilterType.STEMMER, "@goodness #gracious 2getherness"));
 		} catch (TokenizerException e) {

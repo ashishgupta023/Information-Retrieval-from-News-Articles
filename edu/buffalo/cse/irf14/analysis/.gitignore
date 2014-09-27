@@ -16,3 +16,14 @@
 /WeekDays.class
 /AuthorAnalyzer.class
 /TitleAnalyzer.class
+/AuthorOrgAndPlaceAnalyzer.class
+/NewsDateAnalyzer.class
+/ContentAnalyzer.class
+/NumberFilter.class
+/NumberFilterException.class
+/Stemmer.class
+/StemmerException.class
+/StemmerFilter.class
+/StopWordFilter.class
+/StopWordFilterException.class
+/CapitalizationFilter.class

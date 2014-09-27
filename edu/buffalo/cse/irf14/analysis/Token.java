@@ -16,6 +16,7 @@ public class Token {
 	private String termText;
 	//The char array backing termText
 	private char[] termBuffer;
+	private boolean isDate = false;
 	
 	/**
 	 * Method to set the termText to given text.
@@ -78,6 +79,16 @@ public class Token {
 				this.termBuffer = this.termText.toCharArray();
 			}
 		}
+	}
+	
+	public void setIsDate(boolean val)
+	{
+		this.isDate = val;
+	}
+	
+	public boolean isDate()
+	{
+		return isDate;
 	}
 	
 	/**

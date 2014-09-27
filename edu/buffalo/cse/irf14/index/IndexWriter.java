@@ -38,18 +38,41 @@ public class IndexWriter {
 		
 		try
 		{
-			String[] content = d.getField(FieldNames.AUTHOR);
+			
+			
+			/*String[] content = d.getField(FieldNames.AUTHOR);
 			Tokenizer tokenizer = new Tokenizer();
-			TokenStream authorStream = tokenizer.consume(content[0]);
+			TokenStream stream = tokenizer.consume(content[0]);
 			AnalyzerFactory factory = AnalyzerFactory.getInstance();
 			
-			Analyzer analyzer = factory.getAnalyzerForField(FieldNames.AUTHOR, authorStream);
+			Analyzer analyzer = factory.getAnalyzerForField(FieldNames.AUTHOR, stream);
 			while(analyzer.increment())
 			{
 				
 			}
-			authorStream = analyzer.getStream();
-			authorStream.reset();
+			stream = analyzer.getStream();
+			stream.reset();	*/		
+			
+			
+			for(FieldNames name : FieldNames.values())
+			{
+				String[] content = d.getField(name);
+				Tokenizer tokenizer = new Tokenizer();
+				TokenStream stream = tokenizer.consume(content[0]);
+				AnalyzerFactory factory = AnalyzerFactory.getInstance();
+				
+				Analyzer analyzer = factory.getAnalyzerForField(name, stream);
+				if(analyzer != null)
+				{
+					while(analyzer.increment())
+					{
+						
+					}
+				}
+				stream = analyzer.getStream();
+				stream.reset();
+			}
+			
 		}
 		catch(TokenizerException e)
 		{

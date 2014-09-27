@@ -79,6 +79,15 @@ public class DateRuleTest extends TFRuleBaseTest {
 								+ "of the year (102nd in "
 								+ "leap years) in the Gregorian "
 								+ "calendar."));
+				
+				//Added for testing
+				assertArrayEquals(
+						new String[] { "19890302", "is", "my", "birthday.",
+								 },
+						runTest(TokenFilterType.DATE, "03-02-1989 "
+								+ "is my  "
+								+ "birthday. "));
+				//Not implemented
 			/*	assertArrayEquals(
 						new String[] { "Apple", "is", "one", "of", "the",
 								"world's", "most", "valuable", "publicly",

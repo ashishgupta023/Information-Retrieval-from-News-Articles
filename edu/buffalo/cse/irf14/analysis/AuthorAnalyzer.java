@@ -15,14 +15,14 @@ public class AuthorAnalyzer implements Analyzer {
 	 public AuthorAnalyzer(TokenStream stream) {
 		 this.stream = stream;
 		 this.tokenFilterFactory = TokenFilterFactory.getInstance();
-		 
+		 this.filter = null;
 		 
 	}
 
 	@Override
 	public boolean increment() throws TokenizerException {
 		
-		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.SYMBOL, this.stream);
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.ACCENT, this.stream);
 
 		if(this.stream != null)
 		{
@@ -31,16 +31,19 @@ public class AuthorAnalyzer implements Analyzer {
 				
 			}
 		}
-		
-		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.SPECIALCHARS, this.stream);
+
 		 this.stream.reset();
+
+		
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.CAPITALIZATION, this.stream);
 		 if(this.stream != null)
 			{
 				while(this.filter.increment())
 				{
 					
 				}
-			}
+			} 
+		 this.stream.reset();
 
 		return false;
 	}

@@ -49,20 +49,28 @@ public class TokenFilterFactory {
 	public TokenFilter getFilterByType(TokenFilterType type, TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		
-		
-		if(type == TokenFilterType.SYMBOL)
-			return new SymbolFilter(stream);
-		
-		if(type == TokenFilterType.ACCENT)
-			return new AccentFilter(stream);
-		
-		if(type == TokenFilterType.SPECIALCHARS)
-			return new SpecialCharFilter(stream);
-		
-		if(type == TokenFilterType.DATE)
-			return new DateFilter(stream);
-		
-		return null;
+		switch(type)
+		{
+			case SYMBOL:
+				return  new SymbolFilter(stream);
+			case ACCENT:
+				return new AccentFilter(stream);
+			case SPECIALCHARS:
+				return new SpecialCharFilter(stream);
+			case DATE:
+				return new DateFilter(stream);
+			case NUMERIC:
+				return new NumberFilter(stream);
+			case STEMMER:
+				return new StemmerFilter(stream);
+			case STOPWORD:
+				return new StopWordFilter(stream);
+			case CAPITALIZATION:
+				return new CapitalizationFilter(stream);
+			default:
+				return null;
+		}
+			
 		
 	}
 }

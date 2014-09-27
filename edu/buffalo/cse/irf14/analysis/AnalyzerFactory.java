@@ -53,12 +53,22 @@ public class AnalyzerFactory {
 	 */
 	public Analyzer getAnalyzerForField(FieldNames name, TokenStream stream) {
 		//TODO : YOU NEED TO IMPLEMENT THIS METHOD
-		
-		if(name == FieldNames.AUTHOR)
+		switch(name)
 		{
-			return new AuthorAnalyzer(stream);
-		}
+			case AUTHOR:
+				return new AuthorAnalyzer(stream);
+			case TITLE:
+				return new TitleAnalyzer(stream);
+			case AUTHORORG:
+			case PLACE:
+				return new AuthorOrgAndPlaceAnalyzer(stream);
+			case CONTENT:
+				return new ContentAnalyzer(stream);
+			case NEWSDATE:
+				return new NewsDateAnalyzer(stream);
+			default:	
+				return null;
 		
-		return null;
+	    }
 	}
 }
