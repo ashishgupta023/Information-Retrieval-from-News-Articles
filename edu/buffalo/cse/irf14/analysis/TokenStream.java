@@ -55,8 +55,15 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public boolean hasNext() {
 		// TODO YOU MUST IMPLEMENT THIS
-		
-		return litr.hasNext();
+		try
+		{
+			return litr.hasNext();
+		}
+		catch(Exception e)
+		{
+			
+		}
+		return false;
        /* if(this.tokens.size() == this.tokenIndex) {
         	return false;
 		}
@@ -67,19 +74,36 @@ public class TokenStream implements Iterator<Token>{
 	
 	public boolean hasPrevious()
 	{
+		try
+		{
+			
 		return litr.hasPrevious();
+		}
+		catch(Exception e)
+		{
+			
+		}
+		return false;
 	}
 
 	public Token previous()
 	{
-		if(litr.hasPrevious())
+		try
 		{
-			return litr.previous();
+			if(litr.hasPrevious())
+			{
+				return litr.previous();
+			}
+			else
+			{
+				return null;
+			}
 		}
-		else
+		catch(Exception e)
 		{
-			return null;
+			
 		}
+		return null;
 	}
 	
 	/**
@@ -92,16 +116,23 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public Token next() {
 		// TODO YOU MUST IMPLEMENT THIS
-		
-		if(litr.hasNext())
+		try
 		{
-			canCallRemove = true;
-			return litr.next();
+			if(litr.hasNext())
+			{
+				canCallRemove = true;
+				return litr.next();
+			}
+			else
+			{
+				return null;
+			}
 		}
-		else
+		catch(Exception e)
 		{
-			return null;
+			
 		}
+		return null;
 		/*if (this.hasNext() == false) {
 			tokenIndex = 0;
 			return null;
@@ -144,10 +175,16 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
-		
-		while(litr.hasPrevious() )
+		try
 		{
-			litr.previous();
+			while(litr.hasPrevious() )
+			{
+				litr.previous();
+			}
+		}
+		catch(Exception e)
+		{
+			
 		}
 		
 		endReached = false;

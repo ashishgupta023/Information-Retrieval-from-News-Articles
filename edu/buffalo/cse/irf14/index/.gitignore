@@ -2,3 +2,10 @@
 /IndexType.class
 /IndexWriter.class
 /IndexerException.class
+/PostDocIdComparable.class
+/Posting.class
+/PostingList.class
+/FieldDictionary.class
+/Index.class
+/Index$keyCollectFrq.class
+/Index$1keyCollectFrqComparable.class

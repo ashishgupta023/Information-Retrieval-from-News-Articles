@@ -41,7 +41,7 @@ public class Runner {
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
 		
-		try {
+		cut:	try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
@@ -51,9 +51,13 @@ public class Runner {
 				
 				for (String f : files) {
 					try {
-						d = Parser.parse(dir.getAbsolutePath() + File.separator +f);
+						d = Parser.parse(dir.getAbsolutePath() + File.separator +"0000005");
+						//d = Parser.parse("C:\\Users\\Ashish\\workspace\\newsindexer\\training\\money-supply\\0000068");
+						
 						System.out.println("----------"+dir.getAbsolutePath() + File.separator +f);
 						writer.addDocument(d);
+						writer.close();
+						break cut;
 					} catch (ParserException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

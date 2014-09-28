@@ -5,6 +5,7 @@ package edu.buffalo.cse.irf14.index;
 
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
+import edu.buffalo.cse.irf14.analysis.Token;
 import edu.buffalo.cse.irf14.analysis.TokenStream;
 import edu.buffalo.cse.irf14.analysis.Tokenizer;
 import edu.buffalo.cse.irf14.analysis.TokenizerException;
@@ -22,17 +23,28 @@ public class IndexWriter {
 	Tokenizer tokenizer;
 	AnalyzerFactory factory;
 	Analyzer analyzer;
+	Index termIndex;
+	Index categoryIndex;
+	Index authorIndex;
+	Index placeIndex;
+	String indexDir;
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
 	 */
 	public IndexWriter(String indexDir) {
 		//TODO : YOU MUST IMPLEMENT THIS
+		this.indexDir = indexDir;
 		stream = null;
 		content = null;
 		tokenizer = null;
 		factory = null;
 		analyzer = null;
+		this.termIndex = new Index(IndexType.TERM);
+		this.categoryIndex = new Index(IndexType.CATEGORY);
+		this.authorIndex = new Index(IndexType.AUTHOR);
+		this.placeIndex = new Index(IndexType.PLACE);
+		
 	}
 	
 	/**
@@ -68,6 +80,39 @@ public class IndexWriter {
 						}
 						stream = analyzer.getStream();
 						stream.reset();
+						
+						
+							while(stream.hasNext())
+							{
+								Token token = stream.next();
+								int docID = 0;
+								
+								if(name == FieldNames.FILEID)
+								{
+									docID = FieldDictionary.insert(token.toString());
+								}
+
+								if(name == FieldNames.FILEID || name == FieldNames.AUTHORORG || name == FieldNames.CONTENT || name == FieldNames.NEWSDATE || name == FieldNames.TITLE )
+								{
+									this.termIndex.put(token.toString(), docID);
+								}
+								else if(name == FieldNames.CATEGORY)
+								{
+									this.categoryIndex.put(token.toString(),docID );
+								}
+								else if(name == FieldNames.AUTHOR)
+								{
+									this.authorIndex.put(token.toString(), docID);
+								}
+								else if(name == FieldNames.PLACE)
+								{
+									this.placeIndex.put(token.toString(), docID);
+								}
+								
+							
+							}
+						
+						
 					}
 				}
 				
@@ -88,5 +133,16 @@ public class IndexWriter {
 	 */
 	public void close() throws IndexerException {
 		//TODO
+		
+		this.termIndex.sortAndAggregate();
+		this.placeIndex.sortAndAggregate();
+		this.authorIndex.sortAndAggregate();
+		this.categoryIndex.sortAndAggregate();
+		this.termIndex.dumpIntoDisk(this.indexDir);
+		this.placeIndex.dumpIntoDisk(this.indexDir);
+		this.categoryIndex.dumpIntoDisk(this.indexDir);
+		this.authorIndex.dumpIntoDisk(this.indexDir);
+
+		
 	}
 }
