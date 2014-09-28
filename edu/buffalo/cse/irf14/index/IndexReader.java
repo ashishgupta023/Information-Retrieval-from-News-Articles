@@ -6,11 +6,17 @@ package edu.buffalo.cse.irf14.index;
 import java.util.List;
 import java.util.Map;
 
+import edu.buffalo.cse.irf14.analysis.AuthorOrgAndPlaceAnalyzer;
+
 /**
  * @author nikhillo
  * Class that emulates reading data back from a written index
  */
 public class IndexReader {
+	
+	IndexType type;
+	String indexDir;
+	
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory from which the index is to be read.
@@ -20,6 +26,8 @@ public class IndexReader {
 	 */
 	public IndexReader(String indexDir, IndexType type) {
 		//TODO
+		this.type = type;
+		this.indexDir = indexDir;
 	}
 	
 	/**
@@ -29,7 +37,15 @@ public class IndexReader {
 	 */
 	public int getTotalKeyTerms() {
 		//TODO : YOU MUST IMPLEMENT THIS
-		return -1;
+		if(this.type == IndexType.TERM)
+			return IndexWriter.termIndex.getNumTerms();
+		else if (this.type == IndexType.AUTHOR)
+			return IndexWriter.authorIndex.getNumTerms();
+		else if(this.type == IndexType.CATEGORY)
+			return IndexWriter.authorIndex.getNumTerms();
+		else if(this.type == IndexType.PLACE)
+			return IndexWriter.placeIndex.getNumTerms();
+		else return -1;
 	}
 	
 	/**
@@ -39,7 +55,10 @@ public class IndexReader {
 	 */
 	public int getTotalValueTerms() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		return -1;
+		
+		if(this.type == IndexType.TERM || this.type == IndexType.AUTHOR || this.type == IndexType.PLACE || this.type == IndexType.CATEGORY)
+			return FieldDictionary.dict.size();
+		else return -1;
 	}
 	
 	/**
@@ -52,7 +71,17 @@ public class IndexReader {
 	 */
 	public Map<String, Integer> getPostings(String term) {
 		//TODO:YOU MUST IMPLEMENT THIS
-		return null;
+		
+		if (this.type == IndexType.AUTHOR)
+				return IndexWriter.authorIndex.get(term);
+		else if (this.type == IndexType.CATEGORY)
+				return IndexWriter.categoryIndex.get(term);
+		else if (this.type == IndexType.PLACE)
+				return IndexWriter.placeIndex.get(term);
+		else if (this.type == IndexType.TERM)
+			return IndexWriter.termIndex.get(term);
+		else return null;
+		
 	}
 	
 	/**
@@ -64,8 +93,17 @@ public class IndexReader {
 	 */
 	public List<String> getTopK(int k) {
 		//TODO YOU MUST IMPLEMENT THIS
-		return null;
-	}
+		
+		if (this.type == IndexType.AUTHOR)
+			return IndexWriter.authorIndex.getTopK(k);
+		else if (this.type == IndexType.CATEGORY)
+				return IndexWriter.categoryIndex.getTopK(k);
+		else if (this.type == IndexType.PLACE)
+				return IndexWriter.placeIndex.getTopK(k);
+		else if (this.type == IndexType.TERM)
+			return IndexWriter.termIndex.getTopK(k);
+		else return null;	
+		}
 	
 	/**
 	 * Method to implement a simple boolean AND query on the given index

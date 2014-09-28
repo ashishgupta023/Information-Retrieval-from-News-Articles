@@ -23,10 +23,10 @@ public class IndexWriter {
 	Tokenizer tokenizer;
 	AnalyzerFactory factory;
 	Analyzer analyzer;
-	Index termIndex;
-	Index categoryIndex;
-	Index authorIndex;
-	Index placeIndex;
+	static Index termIndex;
+	static Index categoryIndex;
+	static Index authorIndex;
+	static Index placeIndex;
 	String indexDir;
 	/**
 	 * Default constructor
@@ -60,6 +60,11 @@ public class IndexWriter {
 		//TODO : YOU MUST IMPLEMENT THIS
 		try
 		{	
+			
+			int docID = 0;
+			docID = FieldDictionary.insert(d.getField(FieldNames.FILEID)[0]);
+			
+			
 			// Index all documents
 			for(FieldNames name : FieldNames.values())
 			{
@@ -85,12 +90,7 @@ public class IndexWriter {
 							while(stream.hasNext())
 							{
 								Token token = stream.next();
-								int docID = 0;
 								
-								if(name == FieldNames.FILEID)
-								{
-									docID = FieldDictionary.insert(token.toString());
-								}
 
 								if(name == FieldNames.FILEID || name == FieldNames.AUTHORORG || name == FieldNames.CONTENT || name == FieldNames.NEWSDATE || name == FieldNames.TITLE )
 								{

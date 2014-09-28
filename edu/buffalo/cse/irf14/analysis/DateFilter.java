@@ -301,16 +301,20 @@ public class DateFilter extends TokenFilter {
 				searchMonth(currToken);
 				if(matchedMonth != null)
 				{
-					filterStream.remove();
 					if(filterStream.hasNext())
 					{
 						
 						currToken = filterStream.next();
 						searchDate(currToken);
+						if(matchedDate == null)
+							currToken = filterStream.previous();
+							
 					}
 					
 					if(matchedDate != null)
 					{
+
+						filterStream.remove();
 
 						if(filterStream.hasNext())
 						{
