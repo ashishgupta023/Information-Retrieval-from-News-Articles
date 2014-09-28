@@ -66,6 +66,8 @@ public class AnalyzerFactory {
 			
 			case NEWSDATE:
 				return new NewsDateAnalyzer(stream);
+			case CATEGORY:
+				return new CategoryAnalyzer(stream);
 			default:	
 				return null;
 		

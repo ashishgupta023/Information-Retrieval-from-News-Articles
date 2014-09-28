@@ -62,12 +62,12 @@ public class IndexerTest {
 		reader = new IndexReader(System.getProperty("INDEX.DIR"), IndexType.TERM);
 	}
 	
-	//added for testing
+	/*//added for testing
 	@Test
 	public final void test()
 	{
 		System.out.println("Test");
-	}
+	}*/
 	
 	/**
 	 * Test method for {@link edu.buffalo.cse.irf14.index.IndexReader#getTotalKeyTerms()}.
@@ -124,7 +124,7 @@ public class IndexerTest {
 			while (analyzer.increment()) {
 				
 			}
-			
+			stream = analyzer.getStream();
 			stream.reset();
 			return stream.next().toString();
 		} catch (TokenizerException e) {
@@ -158,8 +158,8 @@ public class IndexerTest {
 		}
 		
 		//negative case
-		//assertNull(reader.getTopK(-1));
-		//assertNull(reader.getTopK(0));
+		assertNull(reader.getTopK(-1));
+		assertNull(reader.getTopK(0));
 	}
 
 	/**

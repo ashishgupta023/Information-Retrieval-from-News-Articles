@@ -71,7 +71,7 @@ public class Parser {
 							if(placeDate == true)
 							{
 								int hyphenIndex = line.indexOf("-");
-								System.out.println("=============" + line);
+								//System.out.println("=============" + line);
 								if(hyphenIndex > -1)
 								{
 									String placeDateStr = line.substring(0,hyphenIndex);

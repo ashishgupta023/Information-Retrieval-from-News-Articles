@@ -94,19 +94,19 @@ public class IndexWriter {
 
 								if(name == FieldNames.FILEID || name == FieldNames.AUTHORORG || name == FieldNames.CONTENT || name == FieldNames.NEWSDATE || name == FieldNames.TITLE )
 								{
-									this.termIndex.put(token.toString(), docID);
+									termIndex.put(token.toString(), docID);
 								}
 								else if(name == FieldNames.CATEGORY)
 								{
-									this.categoryIndex.put(token.toString(),docID );
+									categoryIndex.put(token.toString(),docID );
 								}
 								else if(name == FieldNames.AUTHOR)
 								{
-									this.authorIndex.put(token.toString(), docID);
+									authorIndex.put(token.toString(), docID);
 								}
 								else if(name == FieldNames.PLACE)
 								{
-									this.placeIndex.put(token.toString(), docID);
+									placeIndex.put(token.toString(), docID);
 								}
 								
 							

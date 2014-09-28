@@ -3,10 +3,11 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import edu.buffalo.cse.irf14.analysis.AuthorOrgAndPlaceAnalyzer;
+import java.util.Set;
 
 /**
  * @author nikhillo
@@ -115,8 +116,56 @@ public class IndexReader {
 	 * if the given term list returns no results
 	 * BONUS ONLY
 	 */
-	public Map<String, Integer> query(String...terms) {
+	public Map<String, Integer> query(String...terms) 
+	{
 		//TODO : BONUS ONLY
+		Map <Integer, Integer> result = new HashMap<Integer, Integer>();
+		
+ 		if (this.type == IndexType.AUTHOR)
+		{
+			
+				//sorted docID & term frequency
+				Map<Integer, Integer> temp1 = IndexWriter.authorIndex.getFileIds(terms[0]);
+				Map<Integer, Integer> temp2 = IndexWriter.authorIndex.getFileIds(terms[1]);
+				Set<Integer> temp1Keys = temp1.keySet();
+				Set<Integer> temp2Keys = temp2.keySet();
+				Iterator itr1 = temp1Keys.iterator();
+				Iterator itr2 = temp2Keys.iterator();
+				if(temp1Keys.size() > temp2Keys.size())
+				{
+					while(itr2.hasNext())
+					{
+						Integer val1 = (Integer) itr1.next();
+						Integer val2 = (Integer) itr2.next();
+						if(val1 == val2)
+						{
+							result.put(val2, temp2.get(val2));
+						}
+					}
+				}
+				else if(temp1Keys.size() < temp2Keys.size())
+				{
+					while(itr1.hasNext())
+					{
+						Integer val1 = (Integer) itr1.next();
+						Integer val2 = (Integer) itr2.next();
+						if(val1 == val2)
+						{
+							result.put(val2, temp2.get(val2));
+						}	
+					}
+				}
+				
+			
+				
+		}
+		/*else if (this.type == IndexType.CATEGORY)
+			return IndexWriter.categoryIndex.get(term);
+		else if (this.type == IndexType.PLACE)
+			return IndexWriter.placeIndex.get(term);
+		else if (this.type == IndexType.TERM)
+		return IndexWriter.termIndex.get(term);
+			else return null;*/
 		return null;
 	}
 }

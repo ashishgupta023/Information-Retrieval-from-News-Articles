@@ -19,7 +19,7 @@ public class CapitalizationRuleTest extends TFRuleBaseTest {
 	@Test
 	public void testRule() {
 			try {
-					assertArrayEquals(new String[] { "this", "is", "a", "test." },
+				assertArrayEquals(new String[] { "this", "is", "a", "test." },
 							runTest(TokenFilterType.CAPITALIZATION, "This is a test."));
 					assertArrayEquals(new String[] {"the", "city", "San Francisco", "is",
 							"in", "California." },

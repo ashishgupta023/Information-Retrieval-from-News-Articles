@@ -3,12 +3,14 @@ package edu.buffalo.cse.irf14.index;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 class Index {
@@ -30,8 +32,10 @@ class Index {
 	}
 	
 	public List<String> getTopK(int k) {
-
-		List <String> topKList = new ArrayList<String>();
+		List <String> topKList =null ;
+		if(k>0)
+		{
+		topKList = new ArrayList<String>();
 		
 		/* Implementing Comparator */
 		class keyCollectFrqComparable implements Comparator<keyCollectFrq>{
@@ -55,7 +59,10 @@ class Index {
 		for(int i = 0; i<k; i++) {
 			topKList.add(listKeyCollectionFrq.get(i).key);
 			}
+		}
+		
 		return topKList;
+
 	}
 
 	
@@ -91,6 +98,19 @@ class Index {
 		PostingList value = termMap.get(term);
 		return value.getPostingList();
 	}
+	
+	public Map<Integer, Integer> getFileIds(String term) {
+		// Returns Value if Key exists in our HashMap else it returns null. 
+		if(!this.termMap.containsKey(term)){
+			return null;
+		}
+		
+		PostingList value = termMap.get(term);
+		Map<Integer , Integer> map = value.getPostingListWithdocIDs();
+		return map;
+	}
+	
+	
 
 	public int sortAndAggregate() {
 		for (String key : this.termMap.keySet()) {
@@ -168,8 +188,9 @@ class Index {
 			value.setFileMarkers(filemarker);
 
 			String postingListString = value.postingListToString();
-
-			raIndexFile.writeChars(postingListString);
+			
+			//byte[] b = postingListString.getBytes(Charset.forName("UTF-8"));
+			raIndexFile.writeBytes(postingListString);
 		} catch (Exception e){
 			
 		} finally {

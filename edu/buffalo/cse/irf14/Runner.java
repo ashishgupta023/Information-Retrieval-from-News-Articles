@@ -4,6 +4,9 @@
 package edu.buffalo.cse.irf14;
 
 import java.io.File;
+import java.sql.Time;
+import java.util.Calendar;
+import java.util.Date;
 
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.document.Parser;
@@ -31,7 +34,8 @@ public class Runner {
 		String ipDir = args[0];
 		String indexDir = args[1];
 		//more? idk!
-		
+		long a = System.currentTimeMillis();
+		System.out.println("Started");
 		File ipDirectory = new File(ipDir);
 		String[] catDirectories = ipDirectory.list();
 		
@@ -41,8 +45,8 @@ public class Runner {
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
 		
-		cut:	try {
-			for (String cat : catDirectories) {
+			try {
+				cut:	for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
 				
@@ -54,9 +58,9 @@ public class Runner {
 						d = Parser.parse(dir.getAbsolutePath() + File.separator +"0000005");
 						//d = Parser.parse("C:\\Users\\Ashish\\workspace\\newsindexer\\training\\money-supply\\0000068");
 						
-						System.out.println("----------"+dir.getAbsolutePath() + File.separator +f);
+						//System.out.println("----------"+dir.getAbsolutePath() + File.separator +f);
 						writer.addDocument(d);
-						writer.close();
+						//writer.close();
 						break cut;
 					} catch (ParserException e) {
 						// TODO Auto-generated catch block
@@ -68,6 +72,10 @@ public class Runner {
 			}
 			
 			writer.close();
+			
+			long b = System.currentTimeMillis();
+			long diff = b-a;
+			System.out.println("Time taken: :" + Long.toString(diff) );
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
