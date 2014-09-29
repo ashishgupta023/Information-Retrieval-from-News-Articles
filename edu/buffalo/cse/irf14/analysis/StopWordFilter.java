@@ -36,7 +36,6 @@ public class StopWordFilter extends TokenFilter {
 		}
 		catch(Exception e)
 		{
-			System.out.println("-- Problem in applying StopWord Filter--");
 		}
 		
 		return filterStream.hasNext();

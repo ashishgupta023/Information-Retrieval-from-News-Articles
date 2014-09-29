@@ -91,22 +91,24 @@ public class IndexWriter {
 							{
 								Token token = stream.next();
 								
-
-								if(name == FieldNames.FILEID || name == FieldNames.AUTHORORG || name == FieldNames.CONTENT || name == FieldNames.NEWSDATE || name == FieldNames.TITLE )
+								if(token != null && !token.toString().isEmpty()  )
 								{
-									termIndex.put(token.toString(), docID);
-								}
-								else if(name == FieldNames.CATEGORY)
-								{
-									categoryIndex.put(token.toString(),docID );
-								}
-								else if(name == FieldNames.AUTHOR)
-								{
-									authorIndex.put(token.toString(), docID);
-								}
-								else if(name == FieldNames.PLACE)
-								{
-									placeIndex.put(token.toString(), docID);
+									if(name == FieldNames.FILEID || name == FieldNames.AUTHORORG || name == FieldNames.CONTENT || name == FieldNames.NEWSDATE || name == FieldNames.TITLE )
+									{
+										termIndex.put(token.toString(), docID);
+									}
+									else if(name == FieldNames.CATEGORY)
+									{
+										categoryIndex.put(token.toString(),docID );
+									}
+									else if(name == FieldNames.AUTHOR)
+									{
+										authorIndex.put(token.toString(), docID);
+									}
+									else if(name == FieldNames.PLACE)
+									{
+										placeIndex.put(token.toString(), docID);
+									}
 								}
 								
 							

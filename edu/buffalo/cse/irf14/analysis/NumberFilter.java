@@ -7,7 +7,7 @@ public class NumberFilter extends TokenFilter  {
 	
 	private Token filterNumbers(Token token) {
 		String numRegex = "(\\d+[,%/.]*\\d*)[%.]*";
-		if (token.isDate()) {			// This Method has to be created
+		if (token.isDate()) {			
 			return token;
 		}
 		String tokenText = token.getTermText();
@@ -27,7 +27,7 @@ public class NumberFilter extends TokenFilter  {
 		{
 		if(filterStream.hasNext()) {
 			currToken = filterStream.next();
-			currToken = filterNumbers(currToken);			// In case of StopWord token, this will be empty string, please check how to use this. I am confused still in the flow..
+			currToken = filterNumbers(currToken);			
 		}
 		}
 		catch(Exception e)

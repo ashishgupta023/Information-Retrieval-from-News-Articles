@@ -91,7 +91,6 @@ public class CapitalizationFilter extends TokenFilter {
 		}
 		catch(Exception e)
 		{
-			System.out.println("--Problem in applying Capitalization Filter");
 		}
 		return filterStream.hasNext();
 

@@ -51,6 +51,7 @@ public class PostingList {
 			Posting post = postingList.get(i);
 			// docId to fileId lookup
 			String fileId = FieldDictionary.get(post.getDocId());
+
 			posts.put(fileId, post.getTermFrq());
 		}
 		return posts;

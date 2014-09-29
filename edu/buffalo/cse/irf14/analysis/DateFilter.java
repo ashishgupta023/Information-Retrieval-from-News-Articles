@@ -410,7 +410,6 @@ public class DateFilter extends TokenFilter {
 		}
 		catch(Exception e)
 		{
-			System.out.println("--Problem in applying Date Filter--");
 		}
 		
 		return filterStream.hasNext();

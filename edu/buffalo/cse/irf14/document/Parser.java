@@ -105,14 +105,12 @@ public class Parser {
 			}
 			else
 			{
-				System.out.println("--File Name cannot be null--");
 				throw new ParserException();
 				
 			}
 		}
 		catch(IOException e)
 		{
-			System.out.println("--Problem initiating the IO stream with the given file name--");
 			throw new ParserException();
 		}
 		

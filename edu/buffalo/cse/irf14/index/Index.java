@@ -33,6 +33,8 @@ class Index {
 	
 	public List<String> getTopK(int k) {
 		List <String> topKList =null ;
+		
+		
 		if(k>0)
 		{
 		topKList = new ArrayList<String>();
@@ -56,6 +58,8 @@ class Index {
 			listKeyCollectionFrq.add(keyCollectFrqObj);
 		}
 		Collections.sort(listKeyCollectionFrq, new keyCollectFrqComparable());
+		if(k> listKeyCollectionFrq.size() )
+			k=listKeyCollectionFrq.size();
 		for(int i = 0; i<k; i++) {
 			topKList.add(listKeyCollectionFrq.get(i).key);
 			}
@@ -69,6 +73,8 @@ class Index {
 	
 	public boolean put(String term, Integer docId) {
 		/* Checking if term is previously present or not. */
+		
+
 		if(!this.termMap.containsKey(term)) {
 			PostingList postingValue = new PostingList();
 			postingValue.insert(docId);

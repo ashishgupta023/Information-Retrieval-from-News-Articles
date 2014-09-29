@@ -98,7 +98,6 @@ public class SymbolFilter extends TokenFilter{
 		}
 		catch(Exception e)
 		{
-			System.out.println("--Problem in applying Symbol Filter--");
 		}
 		
 		return filterStream.hasNext();

@@ -38,7 +38,6 @@ public class StemmerFilter extends TokenFilter {
 		}
 		catch(Exception e)
 		{
-			System.out.println("--Problem in applying Stemmer Filter--");
 		}
 		return filterStream.hasNext();
 	}

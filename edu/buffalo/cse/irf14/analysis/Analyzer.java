@@ -28,5 +28,4 @@ public interface Analyzer {
 	 */
 	public abstract TokenStream getStream();
 	
-	//public Analyzer getAnalyzerType(FieldNames name);
 }

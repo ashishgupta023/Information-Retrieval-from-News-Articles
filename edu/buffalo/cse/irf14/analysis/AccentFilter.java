@@ -36,7 +36,6 @@ public class AccentFilter extends TokenFilter {
 		}
 		catch(Exception e)
 		{
-			System.out.println("--Problem in applying the Accent Filter--");
 		}
 		
 		return filterStream.hasNext();
