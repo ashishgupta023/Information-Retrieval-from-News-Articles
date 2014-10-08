@@ -3,6 +3,11 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.Token;
@@ -23,11 +28,14 @@ public class IndexWriter {
 	Tokenizer tokenizer;
 	AnalyzerFactory factory;
 	Analyzer analyzer;
-	static Index termIndex;
-	static Index categoryIndex;
-	static Index authorIndex;
-	static Index placeIndex;
+	Index termIndex;
+	Index categoryIndex;
+	Index authorIndex;
+	Index placeIndex;
 	String indexDir;
+	FieldDictionary  dictionary ; 
+	FileOutputStream fileOutputStream ;
+	ObjectOutputStream objectOutputStream ;
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
@@ -40,6 +48,9 @@ public class IndexWriter {
 		tokenizer = null;
 		factory = null;
 		analyzer = null;
+		fileOutputStream = null;
+		dictionary = new FieldDictionary();
+		objectOutputStream = null;
 		this.termIndex = new Index(IndexType.TERM);
 		this.categoryIndex = new Index(IndexType.CATEGORY);
 		this.authorIndex = new Index(IndexType.AUTHOR);
@@ -62,7 +73,7 @@ public class IndexWriter {
 		{	
 			
 			int docID = 0;
-			docID = FieldDictionary.insert(d.getField(FieldNames.FILEID)[0]);
+			docID = dictionary.insert(d.getField(FieldNames.FILEID)[0]);
 			
 			
 			// Index all documents
@@ -127,7 +138,81 @@ public class IndexWriter {
 		}
 		
 	}
+	public void dumpIntoDisk(Index index) {		// this dumps entire list to disk
+		String BasePath = this.indexDir;
 	
+		String indexBaseDirPath = BasePath +File.separator + index.indexType.toString();
+		File indexBaseDir = new File(indexBaseDirPath);
+		
+		// create this Directory of not exists..
+		if(!indexBaseDir.exists()) {
+			indexBaseDir.mkdir();
+		}
+		
+		if(index!=null)
+		{
+		
+		String indexBaseFile = indexBaseDirPath + File.separator + index.indexType.toString();
+
+		
+		File filehandle = new File(indexBaseFile );
+
+		try {
+			 fileOutputStream =  new FileOutputStream(filehandle);
+			 objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			objectOutputStream.writeObject(index);
+			
+			objectOutputStream.close();
+			fileOutputStream.close();
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	
+	}
+	}
+	
+	public void dumpDictionary() {		
+		String BasePath = this.indexDir;
+	
+		String indexBaseDirPath = BasePath +File.separator;
+		File indexBaseDir = new File(indexBaseDirPath);
+		
+		// create this Directory of not exists..
+		if(!indexBaseDir.exists()) {
+			indexBaseDir.mkdir();
+		}
+		
+		if(dictionary!=null)
+		{
+		
+		String indexBaseFile = indexBaseDirPath + File.separator + "dictionary";
+
+		
+		File filehandle = new File(indexBaseFile );
+
+		try {
+			 fileOutputStream =  new FileOutputStream(filehandle);
+			 objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			objectOutputStream.writeObject(dictionary);
+			
+			objectOutputStream.close();
+			fileOutputStream.close();
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	
+	}
+	}
 	/**
 	 * Method that indicates that all open resources must be closed
 	 * and cleaned and that the entire indexing operation has been completed.
@@ -140,11 +225,13 @@ public class IndexWriter {
 		this.placeIndex.sortAndAggregate();
 		this.authorIndex.sortAndAggregate();
 		this.categoryIndex.sortAndAggregate();
-		this.termIndex.dumpIntoDisk(this.indexDir);
-		this.placeIndex.dumpIntoDisk(this.indexDir);
-		this.categoryIndex.dumpIntoDisk(this.indexDir);
-		this.authorIndex.dumpIntoDisk(this.indexDir);
-
+		dumpDictionary();
+		dumpIntoDisk(termIndex);
+		dumpIntoDisk(placeIndex);
+		dumpIntoDisk(categoryIndex);
+		dumpIntoDisk(authorIndex);
+		
+		
 		
 	}
 }

@@ -3,11 +3,20 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * @author nikhillo
@@ -17,6 +26,14 @@ public class IndexReader {
 	
 	IndexType type;
 	String indexDir;
+	private static Index termIndex;
+	private static Index authorIndex;
+	private static Index categoryIndex;
+	private static Index placeIndex;
+	private static FieldDictionary  dict;
+	FileInputStream fileInputStream;
+	ObjectInputStream objectInputStream;
+	
 	
 	/**
 	 * Default constructor
@@ -29,6 +46,58 @@ public class IndexReader {
 		//TODO
 		this.type = type;
 		this.indexDir = indexDir;
+		this.fileInputStream = null;
+		this.objectInputStream = null;
+		
+		
+	}
+	
+	private Index readIndex(IndexType type)
+	{
+		try {
+			fileInputStream = new FileInputStream(this.indexDir+ File.separator + type.toString() + File.separator + type.toString() );
+			objectInputStream = new ObjectInputStream(fileInputStream);
+			Index tempIndex = (Index)objectInputStream.readObject();
+			objectInputStream.close();
+			fileInputStream.close();
+
+			return tempIndex;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(IOException e)
+		{
+			e.printStackTrace();
+		} catch (ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private FieldDictionary readDictionary()
+	{
+		try {
+			fileInputStream = new FileInputStream(this.indexDir+ File.separator + "dictionary" );
+			objectInputStream = new ObjectInputStream(fileInputStream);
+			FieldDictionary tempDict = (FieldDictionary)objectInputStream.readObject();
+			objectInputStream.close();
+			fileInputStream.close();
+
+			return tempDict;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(IOException e)
+		{
+			e.printStackTrace();
+		} catch (ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -38,14 +107,28 @@ public class IndexReader {
 	 */
 	public int getTotalKeyTerms() {
 		//TODO : YOU MUST IMPLEMENT THIS
+		
+		
 		if(this.type == IndexType.TERM)
-			return IndexWriter.termIndex.getNumTerms();
+		{
+			termIndex = readIndex(IndexType.TERM);
+			return termIndex.getNumTerms();
+		}
 		else if (this.type == IndexType.AUTHOR)
-			return IndexWriter.authorIndex.getNumTerms();
+		{
+			authorIndex = readIndex(IndexType.AUTHOR);
+			return authorIndex.getNumTerms();
+		}
 		else if(this.type == IndexType.CATEGORY)
-			return IndexWriter.authorIndex.getNumTerms();
+		{
+			categoryIndex = readIndex(IndexType.CATEGORY);
+			return categoryIndex.getNumTerms();
+		}
 		else if(this.type == IndexType.PLACE)
-			return IndexWriter.placeIndex.getNumTerms();
+		{
+			placeIndex = readIndex(IndexType.PLACE);
+			return placeIndex.getNumTerms();
+		}
 		else return -1;
 	}
 	
@@ -56,9 +139,9 @@ public class IndexReader {
 	 */
 	public int getTotalValueTerms() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		
+		FieldDictionary dictionary = readDictionary();
 		if(this.type == IndexType.TERM || this.type == IndexType.AUTHOR || this.type == IndexType.PLACE || this.type == IndexType.CATEGORY)
-			return FieldDictionary.dict.size();
+			return dictionary.dict.size();
 		else return -1;
 	}
 	
@@ -72,15 +155,28 @@ public class IndexReader {
 	 */
 	public Map<String, Integer> getPostings(String term) {
 		//TODO:YOU MUST IMPLEMENT THIS
-		
-		if (this.type == IndexType.AUTHOR)
-				return IndexWriter.authorIndex.get(term);
-		else if (this.type == IndexType.CATEGORY)
-				return IndexWriter.categoryIndex.get(term);
-		else if (this.type == IndexType.PLACE)
-				return IndexWriter.placeIndex.get(term);
-		else if (this.type == IndexType.TERM)
-			return IndexWriter.termIndex.get(term);
+		FieldDictionary dictionary = readDictionary();
+
+		if(this.type == IndexType.TERM)
+		{
+			termIndex = readIndex(IndexType.TERM);
+			return termIndex.get(term,dictionary);
+		}
+		else if (this.type == IndexType.AUTHOR)
+		{
+			authorIndex = readIndex(IndexType.AUTHOR);
+			return authorIndex.get(term,dictionary);
+		}
+		else if(this.type == IndexType.CATEGORY)
+		{
+			categoryIndex = readIndex(IndexType.CATEGORY);
+			return categoryIndex.get(term,dictionary);
+		}
+		else if(this.type == IndexType.PLACE)
+		{
+			placeIndex = readIndex(IndexType.PLACE);
+			return placeIndex.get(term,dictionary);
+		}
 		else return null;
 		
 	}
@@ -94,17 +190,84 @@ public class IndexReader {
 	 */
 	public List<String> getTopK(int k) {
 		//TODO YOU MUST IMPLEMENT THIS
-		
-		if (this.type == IndexType.AUTHOR)
-			return IndexWriter.authorIndex.getTopK(k);
-		else if (this.type == IndexType.CATEGORY)
-				return IndexWriter.categoryIndex.getTopK(k);
-		else if (this.type == IndexType.PLACE)
-				return IndexWriter.placeIndex.getTopK(k);
-		else if (this.type == IndexType.TERM)
-			return IndexWriter.termIndex.getTopK(k);
-		else return null;	
+		if(this.type == IndexType.TERM)
+		{
+			termIndex = readIndex(IndexType.TERM);
+			return termIndex.getTopK(k);
 		}
+		else if (this.type == IndexType.AUTHOR)
+		{
+			authorIndex = readIndex(IndexType.AUTHOR);
+			return authorIndex.getTopK(k);
+		}
+		else if(this.type == IndexType.CATEGORY)
+		{
+			categoryIndex = readIndex(IndexType.CATEGORY);
+			return categoryIndex.getTopK(k);
+		}
+		else if(this.type == IndexType.PLACE)
+		{
+			placeIndex = readIndex(IndexType.PLACE);
+			return placeIndex.getTopK(k);
+		}
+			else return null;	
+		}
+	
+	
+	Map<String, Integer>  intersectPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	{
+		Map <String, Integer> tempResult = new HashMap<String, Integer>();
+		
+		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
+			for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+				if (temp1Entry.getKey().equals(temp2Entry.getKey())) {
+					tempResult.put(temp1Entry.getKey(),
+							temp1Entry.getValue() + temp2Entry.getValue());
+				}
+			}
+		}
+		return tempResult;
+
+	}
+	
+	Map<String, Integer>  unionPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	{
+		Map <String, Integer> tempResult = new HashMap<String, Integer>();
+		
+		
+		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
+			for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+				if (temp1Entry.getKey().equals(temp2Entry.getKey())) {
+					tempResult.put(temp1Entry.getKey(),
+							temp1Entry.getValue() + temp2Entry.getValue());
+				}
+			}
+		}
+		
+		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
+				if (!tempResult.containsKey(temp1Entry.getKey())) {
+					tempResult.put(temp1Entry.getKey(),
+							temp1Entry.getValue());
+				}
+			
+		}
+		
+		for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+			if (!tempResult.containsKey(temp2Entry.getKey())) {
+				if (!temp2Entry.getKey().equals(temp2Entry.getKey())) {
+					tempResult.put(temp2Entry.getKey(),
+							temp2Entry.getValue());
+				}
+			}
+		}
+		
+		
+		return tempResult;
+
+	}
+	
+
+
 	
 	/**
 	 * Method to implement a simple boolean AND query on the given index
@@ -116,56 +279,83 @@ public class IndexReader {
 	 * if the given term list returns no results
 	 * BONUS ONLY
 	 */
-	public Map<String, Integer> query(String...terms) 
+	public Map<String, Integer> query(String...terms ) 
 	{
 		//TODO : BONUS ONLY
-		Map <Integer, Integer> result = new HashMap<Integer, Integer>();
+		HashMap<String, Integer> result = new LinkedHashMap<String, Integer>();
 		
- 		if (this.type == IndexType.AUTHOR)
-		{
-			
-				//sorted docID & term frequency
-				Map<Integer, Integer> temp1 = IndexWriter.authorIndex.getFileIds(terms[0]);
-				Map<Integer, Integer> temp2 = IndexWriter.authorIndex.getFileIds(terms[1]);
-				Set<Integer> temp1Keys = temp1.keySet();
-				Set<Integer> temp2Keys = temp2.keySet();
-				Iterator itr1 = temp1Keys.iterator();
-				Iterator itr2 = temp2Keys.iterator();
-				if(temp1Keys.size() > temp2Keys.size())
-				{
-					while(itr2.hasNext())
-					{
-						Integer val1 = (Integer) itr1.next();
-						Integer val2 = (Integer) itr2.next();
-						if(val1 == val2)
-						{
-							result.put(val2, temp2.get(val2));
-						}
-					}
-				}
-				else if(temp1Keys.size() < temp2Keys.size())
-				{
-					while(itr1.hasNext())
-					{
-						Integer val1 = (Integer) itr1.next();
-						Integer val2 = (Integer) itr2.next();
-						if(val1 == val2)
-						{
-							result.put(val2, temp2.get(val2));
-						}	
-					}
-				}
-				
-			
-				
+		ArrayList<Map<String, Integer>> termsPostingListsArray = new ArrayList<Map<String, Integer>>();
+		for (int i = 0; i < terms.length; i++) {
+			termsPostingListsArray.add(getPostings(terms[i]));
 		}
-		/*else if (this.type == IndexType.CATEGORY)
-			return IndexWriter.categoryIndex.get(term);
-		else if (this.type == IndexType.PLACE)
-			return IndexWriter.placeIndex.get(term);
-		else if (this.type == IndexType.TERM)
-		return IndexWriter.termIndex.get(term);
-			else return null;*/
-		return null;
+		
+		if(terms.length == 1)
+			return termsPostingListsArray.get(0);
+		else if(terms.length  > 1)
+		{
+			Map<String, Integer> tempMap = intersectPostings(
+					termsPostingListsArray.get(0), termsPostingListsArray.get(1));
+			for (int i = 2; i < terms.length; i++) {
+				tempMap = intersectPostings(tempMap, termsPostingListsArray.get(i));
+			}
+			
+			List<Entry<String, Integer>> unsortedEntries = new LinkedList<Map.Entry<String, Integer>>(
+					tempMap.entrySet());
+			
+			Collections.sort(unsortedEntries, new Comparator<Entry<String, Integer>>() {
+
+				@Override
+				public int compare(Entry<String, Integer> val1,
+						Entry<String, Integer> val2) {
+					return val2.getValue().compareTo(val1.getValue());
+				}
+			});
+
+			for (Map.Entry<String, Integer> entry : unsortedEntries) {
+				result.put(entry.getKey(), entry.getValue());
+			}
+			
+		}
+		return result;
+	}
+	
+	public Map<String, Integer> orQuery(String...terms ) 
+	{
+		//TODO : BONUS ONLY
+		HashMap <String, Integer> result = new LinkedHashMap<String, Integer>();
+		
+		ArrayList<Map<String, Integer>> termsPostingListsArray = new ArrayList<Map<String, Integer>>();
+		for (int i = 0; i < terms.length; i++) {
+			termsPostingListsArray.add(getPostings(terms[i]));
+		}
+		
+		if(terms.length == 1)
+			return termsPostingListsArray.get(0);
+		else if(terms.length  > 1)
+		{
+			Map<String, Integer> tempMap = unionPostings(
+					termsPostingListsArray.get(0), termsPostingListsArray.get(1));
+			for (int i = 2; i < terms.length; i++) {
+				tempMap = unionPostings(tempMap, termsPostingListsArray.get(i));
+			}
+			
+			List<Entry<String, Integer>> unsortedEntries = new LinkedList<Map.Entry<String, Integer>>(
+					tempMap.entrySet());
+			
+			 Collections.sort(unsortedEntries, new Comparator<Entry<String, Integer>>() {
+
+				@Override
+				public int compare(Entry<String, Integer> val1,
+						Entry<String, Integer> val2) {
+					return val2.getValue().compareTo(val1.getValue());
+				}
+			});
+
+			for (Map.Entry<String, Integer> entry : unsortedEntries) {
+				result.put(entry.getKey(), entry.getValue());
+			}
+			
+		}
+		return result;
 	}
 }

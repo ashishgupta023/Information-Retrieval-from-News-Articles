@@ -17,7 +17,7 @@ public class Token {
 	//The char array backing termText
 	private char[] termBuffer;
 	private boolean isDate = false;
-	
+	private int posIndex ; // adding support for positional index
 	/**
 	 * Method to set the termText to given text.
 	 * This is a sample implementation and you CAN change this
@@ -38,6 +38,17 @@ public class Token {
 	protected String getTermText() {
 		return termText;
 	}
+	
+	protected void setPosIndex(int i) {
+		posIndex = i;
+	}
+	
+	
+	protected String getPosIndex() {
+		return termText;
+	}
+	
+	
 	
 	/**
 	 * Method to set the termBuffer to the given buffer.

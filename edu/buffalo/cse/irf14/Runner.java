@@ -4,12 +4,12 @@
 package edu.buffalo.cse.irf14;
 
 import java.io.File;
+import java.util.Map;
 
 import edu.buffalo.cse.irf14.document.Document;
-import edu.buffalo.cse.irf14.document.Parser;
-import edu.buffalo.cse.irf14.document.ParserException;
+import edu.buffalo.cse.irf14.index.IndexReader;
+import edu.buffalo.cse.irf14.index.IndexType;
 import edu.buffalo.cse.irf14.index.IndexWriter;
-import edu.buffalo.cse.irf14.index.IndexerException;
 
 /**
  * @author nikhillo
@@ -40,8 +40,16 @@ public class Runner {
 		
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
+		long time = System.currentTimeMillis();
 		
-		try {
+
+		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
+		Map<String,Integer> res =  reader.orQuery("analyst","capital");
+		
+		for (String key : res.keySet()) {
+		    System.out.println(key + " : " + res.get(key));
+		}
+		/* try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
@@ -51,8 +59,9 @@ public class Runner {
 				
 				for (String f : files) {
 					try {
-						d = Parser.parse(dir.getAbsolutePath() + File.separator +f);
+						d = Parser.parse(dir.getAbsolutePath() + File.separator + f);
 						writer.addDocument(d);
+						//break cut;
 					} catch (ParserException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -63,10 +72,12 @@ public class Runner {
 			}
 			
 			writer.close();
+			long res = System.currentTimeMillis() - time;
+			System.out.println(Long.toString(res));
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }

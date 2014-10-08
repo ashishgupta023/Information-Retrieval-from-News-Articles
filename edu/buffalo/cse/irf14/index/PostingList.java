@@ -1,12 +1,18 @@
 package edu.buffalo.cse.irf14.index;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PostingList {
+public class PostingList implements Serializable {
 	private Boolean diskDumped;
 	private Integer collectionFrq;
 	private Integer documentFrq;
@@ -43,19 +49,21 @@ public class PostingList {
 		collectionFrq++;
 		}
 	
-	Map<String, Integer> getPostingList() {
+	Map<String, Integer> getPostingList(FieldDictionary dict) {
 		int numItems = postingList.size();
 		Map<String, Integer> posts = new HashMap<String, Integer>();
 
 		for(int i = 0; i < numItems; i++) {
 			Posting post = postingList.get(i);
 			// docId to fileId lookup
-			String fileId = FieldDictionary.get(post.getDocId());
+			String fileId = dict.get(post.getDocId());
 
 			posts.put(fileId, post.getTermFrq());
 		}
 		return posts;
 	}
+	
+	
 	
 
 	Map<Integer, Integer> getPostingListWithdocIDs() {
@@ -64,7 +72,6 @@ public class PostingList {
 
 		for(int i = 0; i < numItems; i++) {
 			Posting post = postingList.get(i);
-			// docId to fileId lookup
 			posts.put(post.getDocId(), post.getTermFrq());
 		}
 		return posts;
@@ -98,7 +105,7 @@ public class PostingList {
 			}
 		}
 		int length = j + 1;
-		postingList = postingList.subList(0, length);
+		postingList = new ArrayList<Posting>(postingList.subList(0, length));
 		this.documentFrq = length;
 		return length;
 	}

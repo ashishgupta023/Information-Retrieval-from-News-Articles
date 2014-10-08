@@ -1,7 +1,10 @@
 package edu.buffalo.cse.irf14.index;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 
-class Posting {
+
+class Posting implements Serializable {
 	Integer docId;
 	Integer termFrq;
 	Posting() {

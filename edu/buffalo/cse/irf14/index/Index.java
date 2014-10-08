@@ -1,21 +1,23 @@
 package edu.buffalo.cse.irf14.index;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
-import java.nio.charset.Charset;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import com.sun.corba.se.spi.ior.Writeable;
 
 
-class Index {
+class Index implements Serializable {
 	private HashMap<String, PostingList> termMap = new HashMap<String, PostingList>();
-	private IndexType indexType;
+	public IndexType indexType;
 	
 	public Index(IndexType indexType) {
 		this.indexType = indexType;
@@ -95,14 +97,14 @@ class Index {
 		else return false;
 	}
 
-	public Map<String, Integer> get(String term) {
+	public Map<String, Integer> get(String term, FieldDictionary dict) {
 		/* Returns Value if Key exists in our HashMap else it returns null. */
 		if(!this.termMap.containsKey(term)){
 			return null;
 		}
 		
 		PostingList value = termMap.get(term);
-		return value.getPostingList();
+		return value.getPostingList(dict);
 	}
 	
 	public Map<Integer, Integer> getFileIds(String term) {
@@ -150,64 +152,7 @@ class Index {
 		return length;
 	}
 	
-	public void dumpIntoDisk(String BasePath) {		// this dumps entire list to disk
-		for (String key : this.termMap.keySet()) {
-			try {
-				dumpIntoDisk(key, BasePath);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public void dumpIntoDisk(String term, String BasePath) throws FileNotFoundException {		// this dumps specific list to disk
-		// Identify the file first where to dump the term.
-		// File baseDir = new File(BasePath);		
-		String indexBaseDirPath = BasePath +File.separator + indexType.toString();
-		File indexBaseDir = new File(indexBaseDirPath);
-		
-		// create this Directory of not exists..
-		if(!indexBaseDir.exists()) {
-			indexBaseDir.mkdir();
-		}
-		
-		if(!term.isEmpty() && term!=null)
-		{
-		String termFirstChar = term.substring(0, 1).toLowerCase();
-		if(termFirstChar.matches("[^a-zA-Z]")) {
-			termFirstChar = "^";
-		}
-		String indexBaseFile = indexBaseDirPath + File.separator + termFirstChar;
-
-		File filehandle = new File(indexBaseFile);
-		long fileLength = filehandle.length();
-
-		//File indexBase = new File(indexBaseFile);
-		
-		RandomAccessFile raIndexFile = new RandomAccessFile(indexBaseFile, "rw");
-		try {
-			raIndexFile.seek(fileLength);
-			long filemarker = raIndexFile.getFilePointer();
-					
-			PostingList value = termMap.get(term);
-			value.setFileMarkers(filemarker);
-
-			String postingListString = value.postingListToString();
-			
-			//byte[] b = postingListString.getBytes(Charset.forName("UTF-8"));
-			raIndexFile.writeBytes(postingListString);
-		} catch (Exception e){
-			
-		} finally {
-			try {
-				raIndexFile.close();
-			} catch (Exception e) {
-				
-			}
-			
-		}
 	
 	}
-	}
-}	
+	
+	

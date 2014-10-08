@@ -47,7 +47,6 @@ public class Tokenizer {
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		TokenStream tokenStream = new TokenStream() ;
-		
 		if(str != null && !str.isEmpty() )
 		{
 
@@ -56,6 +55,7 @@ public class Tokenizer {
 				Token token = new Token();
 				token.setTermText(tok);
 				token.setTermBuffer(tok.toCharArray());
+				
 				tokenStream.add(token);
 
 			}
