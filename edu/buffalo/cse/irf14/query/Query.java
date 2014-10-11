@@ -9,6 +9,10 @@ public class Query {
 	/**
 	 * Method to convert given parsed query into string
 	 */
+	
+	String representation;
+	
+	
 	public String toString() {
 		//TODO: YOU MUST IMPLEMENT THIS
 		return null;

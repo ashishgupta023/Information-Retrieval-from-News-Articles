@@ -4,12 +4,10 @@
 package edu.buffalo.cse.irf14;
 
 import java.io.File;
-import java.util.Map;
 
 import edu.buffalo.cse.irf14.document.Document;
-import edu.buffalo.cse.irf14.index.IndexReader;
-import edu.buffalo.cse.irf14.index.IndexType;
 import edu.buffalo.cse.irf14.index.IndexWriter;
+import edu.buffalo.cse.irf14.query.QueryParser;
 
 /**
  * @author nikhillo
@@ -42,13 +40,17 @@ public class Runner {
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
 		
-
-		IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
+		QueryParser parser = new QueryParser();
+		//parser.parse("hello world" , "OR");
+		//parser.parse("(black OR blue) AND bruises", "OR");
+		parser.parse("Category:War AND Author:Dutt AND Place:Baghdad AND prisoners detainees rebels", "OR");
+		//parser.parse("hello world", "OR");
+		/*IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
 		Map<String,Integer> res =  reader.orQuery("analyst","capital");
 		
 		for (String key : res.keySet()) {
 		    System.out.println(key + " : " + res.get(key));
-		}
+		}*/
 		/* try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
