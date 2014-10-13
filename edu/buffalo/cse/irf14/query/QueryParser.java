@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
  */
 public class QueryParser {
 	
+	
+	
 	public QueryParser() {
 		// TODO Auto-generated constructor stub
 	}
@@ -37,11 +39,11 @@ public class QueryParser {
 	public static Query parse(String userQuery, String defaultOperator) {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
 		
+		Query queryObject = new Query();
 		userQuery = userQuery.trim();
 		
 		defaultOperator = defaultOperator.replaceAll("AND", "+");
 		defaultOperator = defaultOperator.replaceAll("OR", "#");
-		defaultOperator = defaultOperator.replaceAll("NOT", "*");
 
 		String[] userQueryVals = userQuery.split("AND");
 		String joinOpearator = "+";
@@ -51,11 +53,16 @@ public class QueryParser {
 			 userQueryVals = userQuery.split("OR");
 			 joinOpearator = "#";
 			 checkNotContains = "AND";
+			 
+			 
 		}
+		
 		for(int i = 0 ; i< userQueryVals.length ; i++)
 		{
+			
+			
 			Pattern pattern = Pattern.compile("[A-Z][a-z]*:[(]");
-			Matcher matcher = pattern.matcher(userQueryVals[i]);
+			Matcher matcher = pattern.matcher(userQueryVals[i].trim());
 			if(matcher.find())
 			{
 				String indexInUse = matcher.group(0).replaceAll(":[(]", "");
@@ -80,27 +87,72 @@ public class QueryParser {
 			}
 				String[] splitViaSpaces = userQueryVals[i].trim().split(" ");
 
-				if(splitViaSpaces.length > 1 && !userQueryVals[i].contains(checkNotContains) && !userQueryVals[i].contains("NOT") && !userQueryVals[i].contains("\""))
+				
+				
+				if( !userQueryVals[i].contains(checkNotContains) && !userQueryVals[i].contains("NOT") && !userQueryVals[i].contains("\""))
+				{
+					if(splitViaSpaces.length > 1)
+					{
+						userQueryVals[i]  = "";
+	
+						for(int j = 0 ; j < splitViaSpaces.length ; j++)
+						{
+							if(userQueryVals[i].trim() == "")
+							{
+								userQueryVals[i] = splitViaSpaces[j];
+							}
+							else
+							{
+								userQueryVals[i]  = userQueryVals[i].concat(defaultOperator).concat(splitViaSpaces[j]);
+							}
+	
+						}
+						if(!userQuery.startsWith(splitViaSpaces[0].trim()))
+						userQueryVals[i] = " ( "+userQueryVals[i].trim()+" ) ";
+					}
+				}
+				else if(userQueryVals[i].contains("NOT") && !userQueryVals[i].contains("\""))
 				{
 					userQueryVals[i]  = "";
 
-					for(int j = 0 ; j < splitViaSpaces.length ; j++)
+					for(int k = 0 ; k< splitViaSpaces.length ; k++)
 					{
-						if(userQueryVals[i] == "")
+						if(splitViaSpaces[k].trim().contains("NOT"))
 						{
-							userQueryVals[i] = splitViaSpaces[j];
+							splitViaSpaces[k] = "AND";
+							if(splitViaSpaces[k+1].contains("("))
+								splitViaSpaces[k+1] = "(<" + splitViaSpaces[k+1].trim().replace("(", "") + ">";
+							else if(splitViaSpaces[k+1].contains(")"))
+								splitViaSpaces[k+1] = "<" + splitViaSpaces[k+1].trim().replace(")", "") + ">)";
+							else
+								splitViaSpaces[k+1] = "<" + splitViaSpaces[k+1].trim() + ">" ;
+							
+							
+						}
+						
+					}
+					for(int k = 0 ; k< splitViaSpaces.length ; k++)
+					{
+						if(userQueryVals[i].trim() == "")
+						{
+							userQueryVals[i] = splitViaSpaces[k];
 						}
 						else
 						{
-							userQueryVals[i]  = userQueryVals[i].concat(defaultOperator).concat(splitViaSpaces[j]);
+							userQueryVals[i]  = userQueryVals[i].concat(splitViaSpaces[k]);
 						}
-
 					}
-					if(!userQuery.startsWith(splitViaSpaces[0]))
-					userQueryVals[i] = " ( "+userQueryVals[i]+" ) ";
+					
+					if(!userQuery.startsWith(splitViaSpaces[0].trim()))
+						userQueryVals[i] = " ( "+userQueryVals[i].trim()+" ) ";
+					
+					
+					
 				}
 			
 		}
+		
+		
 		
 		userQuery = "";
 
@@ -118,7 +170,6 @@ public class QueryParser {
 		
 		userQuery = userQuery.replaceAll("AND", "+");
 		userQuery = userQuery.replaceAll("OR", "#");
-		userQuery = userQuery.replaceAll("NOT", "*");
 		
 		char[] query = userQuery.toCharArray();
 		
@@ -126,6 +177,9 @@ public class QueryParser {
 		Stack<Character> opsStack = new Stack<Character>();
 		boolean processingQuotes = false;
 	
+		
+		
+		
 		for(int i = 0; i< query.length; i++)
 		{
             StringBuffer buffer = new StringBuffer();
@@ -144,10 +198,16 @@ public class QueryParser {
 							String pushValue = buffer.toString();
 							if(!pushValue.contains(":"))
 							{
-								pushValue = "TERM:".concat(pushValue);
+								if(pushValue.contains("<"))
+								{
+									pushValue = pushValue.replace("<", "").replace(">", "");
+									pushValue = "<TERM:".concat(pushValue).concat(">");
+								}
+								else
+									pushValue = "TERM:".concat(pushValue);
 							}
-							queryStack.push(pushValue);
-							
+							//queryStack.push(pushValue);
+							//queryObject.updateEvalOrder(pushValue);
 		                
 				}
 			
@@ -164,9 +224,17 @@ public class QueryParser {
 					String pushValue = buffer.toString();
 					if(!pushValue.contains(":"))
 					{
-						pushValue = "TERM:".concat(pushValue);
-					}
+						if(pushValue.contains("<"))
+						{
+							pushValue = pushValue.replace("<", "").replace(">", "");
+							pushValue = "<TERM:".concat(pushValue).concat(">");
+						}
+						else
+							pushValue = "TERM:".concat(pushValue);					
+						}
 					queryStack.push(pushValue);
+					queryObject.updateEvalOrder(pushValue);
+
                 }
                 else if(query[i] == '(' )
                 {
@@ -177,8 +245,11 @@ public class QueryParser {
                 	while(opsStack.peek() != '(')
                 	{
                 		String topVal = queryStack.pop();
-                		String pushValue = queryStack.pop().concat(Character.toString(opsStack.pop())).concat(topVal);
+                		String op = Character.toString(opsStack.pop());
+        				queryObject.updateEvalOrder(op);
+                		String pushValue = queryStack.pop().concat(op).concat(topVal);
                 		queryStack.push("[".concat(pushValue).concat("]"));
+
 
                 	}
                 	opsStack.pop();
@@ -192,8 +263,11 @@ public class QueryParser {
                 		String topVal = queryStack.pop();
                 		if(!queryStack.isEmpty())
                 		{
+                			
+                		String op = Character.toString(opsStack.pop());
+        				queryObject.updateEvalOrder(op);
 
-                		String pushValue = queryStack.pop().concat(Character.toString(opsStack.pop())).concat(topVal);
+                		String pushValue = queryStack.pop().concat(op).concat(topVal);
                 		
                 		queryStack.push(pushValue);
                 		}
@@ -201,6 +275,7 @@ public class QueryParser {
                 	}
                 	
                 	opsStack.push(query[i]);
+
                 }		
 		}
 		
@@ -212,7 +287,9 @@ public class QueryParser {
 			String topVal = queryStack.pop();
 			if(!queryStack.isEmpty())
 			{
-				String pushValue = queryStack.pop().concat(Character.toString(opsStack.pop())).concat(topVal);
+				String op = Character.toString(opsStack.pop());
+				queryObject.updateEvalOrder(op);
+				String pushValue = queryStack.pop().concat(op).concat(topVal);
 	    		queryStack.push(pushValue);
 			}
 			else
@@ -223,8 +300,9 @@ public class QueryParser {
 			}
 			
     	}
-		
-		System.out.println("{" + queryStack.pop()+"}" );
+		queryObject.setString("{" + queryStack.pop().replace("+", " AND ").replace("#", " OR ")+"}");
+		System.out.println(queryObject.toString());
+		System.out.println(queryObject.evaluationOrder);
 		return null;
 	}
 	

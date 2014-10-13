@@ -41,10 +41,11 @@ public class Runner {
 		long time = System.currentTimeMillis();
 		
 		QueryParser parser = new QueryParser();
-		//parser.parse("hello world" , "OR");
+		//parser.parse("\"hello world\"" , "OR");
 		//parser.parse("(black OR blue) AND bruises", "OR");
-		parser.parse("Category:War AND Author:Dutt AND Place:Baghdad AND prisoners detainees rebels", "OR");
-		//parser.parse("hello world", "OR");
+		//parser.parse("Category:War AND Author:Dutt AND Place:Baghdad AND prisoners detainees rebels", "OR");
+		//parser.parse("(Love NOT War) AND Category:(movies NOT crime)", "OR");
+		//parser.parse("(hello world you) OR (this is test)", "OR");
 		/*IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
 		Map<String,Integer> res =  reader.orQuery("analyst","capital");
 		
