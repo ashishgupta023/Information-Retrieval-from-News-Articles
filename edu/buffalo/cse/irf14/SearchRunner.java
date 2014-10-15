@@ -2,8 +2,24 @@ package edu.buffalo.cse.irf14;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Stack;
+
+import edu.buffalo.cse.irf14.analysis.Analyzer;
+import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
+import edu.buffalo.cse.irf14.analysis.TokenStream;
+import edu.buffalo.cse.irf14.analysis.Tokenizer;
+import edu.buffalo.cse.irf14.analysis.TokenizerException;
+import edu.buffalo.cse.irf14.document.FieldNames;
+import edu.buffalo.cse.irf14.index.IndexReader;
+import edu.buffalo.cse.irf14.index.IndexType;
+import edu.buffalo.cse.irf14.query.Query;
+import edu.buffalo.cse.irf14.query.QueryParser;
 
 /**
  * Main class to run the searcher.
@@ -13,6 +29,12 @@ import java.util.Map;
  */
 public class SearchRunner {
 	public enum ScoringModel {TFIDF, OKAPI};
+	
+	String indexDir ;
+	String corpusDir;
+	char mode;
+	PrintStream stream;
+	
 	
 	/**
 	 * Default (and only public) constuctor
@@ -24,6 +46,11 @@ public class SearchRunner {
 	public SearchRunner(String indexDir, String corpusDir, 
 			char mode, PrintStream stream) {
 		//TODO: IMPLEMENT THIS METHOD
+		
+		this.indexDir = indexDir;
+		this.corpusDir = corpusDir;
+		this.mode = mode;
+		this.stream = stream;
 	}
 	
 	/**
@@ -33,6 +60,156 @@ public class SearchRunner {
 	 */
 	public void query(String userQuery, ScoringModel model) {
 		//TODO: IMPLEMENT THIS METHOD
+		
+		IndexReader reader = null;
+		
+		Map <String, Integer> result = new LinkedHashMap<String, Integer>();
+		Query query = QueryParser.parse(userQuery, "OR");
+		LinkedList<String> executeQuery = query.getEvalOrder();
+		
+		ListIterator<String> iter = executeQuery.listIterator();
+		
+		if(executeQuery.size() == 1)
+		{
+			String operand = iter.next();
+			iter.remove();
+			String[] analyzedoperand = getAnalyzedTerm(operand);
+			reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0]));
+			result = reader.getPostings(analyzedoperand[1]);
+		}
+		else if(executeQuery.size() >1)
+		{
+			
+				while(iter.hasNext())
+				{
+					String operand2 = null;
+					String operand1 = null;
+					String node = iter.next();
+					while( iter.hasNext() &&  (node != "#" || node != "+" ) )
+					{
+						node = iter.next();
+					}
+					String operator = node;
+					iter.remove();
+					if(iter.hasPrevious())
+					{
+						operand2 = iter.previous();
+						iter.remove();
+					}
+					if(iter.hasPrevious())
+					{
+						 operand1 = iter.previous();
+						iter.remove();
+					}
+					if(!operand1.equals("--RESULT--") && !operand2.equals("--RESULT--"))
+					{
+						String[] analyzedoperand1 = getAnalyzedTerm(operand1);
+						String[] analyzedoperand2 = getAnalyzedTerm(operand2)	;		
+						
+						if(analyzedoperand1[0].equals(analyzedoperand1[0]))
+						{
+							
+							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0]));
+							if(operator.trim().equals("#"))
+							{
+								result = reader.orQuery(analyzedoperand1[1] , analyzedoperand2[1]);
+								if(executeQuery.size() != 0)
+									executeQuery.push("--RESULT--");	
+							}
+							else if( operator.trim().equals("+"))
+							{
+								result = reader.query(analyzedoperand1[1] , analyzedoperand2[1]);
+								if(executeQuery.size() != 0)
+									executeQuery.push("--RESULT--");	
+							}
+						}
+						else
+						{
+							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0]));
+							result = reader.getPostings(analyzedoperand1[1]);
+							reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand2[0]));
+							Map <String, Integer> tempresult = reader.getPostings(analyzedoperand2[1]);
+							if(operator.trim().equals("#"))
+							{
+								result = reader.unionPostings(result, tempresult);
+								if(executeQuery.size() != 0)
+									executeQuery.push("--RESULT--");	
+							}
+							if(operator.trim().equals("+"))
+							{
+								result = reader.intersectPostings(result, tempresult);
+								if(executeQuery.size() != 0)
+									executeQuery.push("--RESULT--");	
+							}
+						}
+					}
+					else
+					{
+						String[] analyzedoperand = null;
+						if(operand1.equals("--RESULT--"))
+						{
+							analyzedoperand = getAnalyzedTerm(operand2);		
+						}
+						else if(operand2.equals("--RESULT--"))
+						{
+							analyzedoperand = getAnalyzedTerm(operand1);
+						}
+						reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0]));
+						if(operator.trim().equals("#"))
+						{
+							result = reader.unionPostings(result, reader.getPostings(analyzedoperand[1]));
+							if(executeQuery.size() != 0)
+								executeQuery.push("--RESULT--");	
+						}
+						if(operator.trim().equals("+"))
+						{
+							result = reader.intersectPostings(result, reader.getPostings(analyzedoperand[1]));
+							if(executeQuery.size() != 0)
+								executeQuery.push("--RESULT--");	
+						}
+					}
+				}
+			
+		}
+		
+		System.out.println(result);
+	
+	}
+	
+	private static String[] getAnalyzedTerm(String operand ) {
+		
+		String[] string = null;
+		Tokenizer tknizer = new Tokenizer();
+		Analyzer analyzer = null;
+		AnalyzerFactory fact = AnalyzerFactory.getInstance();
+		
+		if(operand.contains(":"))
+		{
+			string = operand.split(":");
+		}
+		try {
+			TokenStream stream = tknizer.consume(string[1]);
+			if(string[0].trim().equals("TERM"))
+				 analyzer = fact.getAnalyzerForField(FieldNames.CONTENT, stream);
+			else if(string[0].trim().equals("AUTHOR"))
+				 analyzer = fact.getAnalyzerForField(FieldNames.AUTHOR, stream);
+			else if(string[0].trim().equals("CATEGORY"))
+				 analyzer = fact.getAnalyzerForField(FieldNames.CATEGORY, stream);
+			else if(string[0].trim().equals("PLACE"))
+				 analyzer = fact.getAnalyzerForField(FieldNames.PLACE, stream);
+
+			while (analyzer.increment()) {
+				
+			}
+			stream = analyzer.getStream();
+			stream.reset();
+			string[1] = stream.next().toString();
+			return string;
+		} catch (TokenizerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return string;
 	}
 	
 	/**

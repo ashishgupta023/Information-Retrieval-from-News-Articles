@@ -5,6 +5,7 @@ package edu.buffalo.cse.irf14;
 
 import java.io.File;
 
+import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.index.IndexWriter;
 import edu.buffalo.cse.irf14.query.QueryParser;
@@ -40,7 +41,10 @@ public class Runner {
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
 		
-		QueryParser parser = new QueryParser();
+		SearchRunner testSearch = new SearchRunner(indexDir, ipDir, 'Q', null);
+		
+		testSearch.query("controlling interest", ScoringModel.TFIDF);
+		//QueryParser parser = new QueryParser();
 		//parser.parse("\"hello world\"" , "OR");
 		//parser.parse("(black OR blue) AND bruises", "OR");
 		//parser.parse("Category:War AND Author:Dutt AND Place:Baghdad AND prisoners detainees rebels", "OR");

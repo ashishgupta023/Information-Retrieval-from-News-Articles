@@ -214,7 +214,7 @@ public class IndexReader {
 		}
 	
 	
-	Map<String, Integer>  intersectPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	public Map<String, Integer>  intersectPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
 	{
 		Map <String, Integer> tempResult = new HashMap<String, Integer>();
 		
@@ -230,7 +230,7 @@ public class IndexReader {
 
 	}
 	
-	Map<String, Integer>  unionPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	public Map<String, Integer>  unionPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
 	{
 		Map <String, Integer> tempResult = new HashMap<String, Integer>();
 		

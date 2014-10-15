@@ -303,7 +303,7 @@ public class QueryParser {
 		queryObject.setString("{" + queryStack.pop().replace("+", " AND ").replace("#", " OR ")+"}");
 		System.out.println(queryObject.toString());
 		System.out.println(queryObject.evaluationOrder);
-		return null;
+		return queryObject;
 	}
 	
 	
