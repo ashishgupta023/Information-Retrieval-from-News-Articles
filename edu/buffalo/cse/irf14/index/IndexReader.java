@@ -30,7 +30,7 @@ public class IndexReader {
 	private static Index authorIndex;
 	private static Index categoryIndex;
 	private static Index placeIndex;
-	private static FieldDictionary  dict;
+	private static DocumentDictionary  dict;
 	FileInputStream fileInputStream;
 	ObjectInputStream objectInputStream;
 	
@@ -76,12 +76,12 @@ public class IndexReader {
 		return null;
 	}
 	
-	private FieldDictionary readDictionary()
+	private DocumentDictionary readDictionary()
 	{
 		try {
 			fileInputStream = new FileInputStream(this.indexDir+ File.separator + "dictionary" );
 			objectInputStream = new ObjectInputStream(fileInputStream);
-			FieldDictionary tempDict = (FieldDictionary)objectInputStream.readObject();
+			DocumentDictionary tempDict = (DocumentDictionary)objectInputStream.readObject();
 			objectInputStream.close();
 			fileInputStream.close();
 
@@ -139,7 +139,7 @@ public class IndexReader {
 	 */
 	public int getTotalValueTerms() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		FieldDictionary dictionary = readDictionary();
+		DocumentDictionary dictionary = readDictionary();
 		if(this.type == IndexType.TERM || this.type == IndexType.AUTHOR || this.type == IndexType.PLACE || this.type == IndexType.CATEGORY)
 			return dictionary.dict.size();
 		else return -1;
@@ -155,7 +155,7 @@ public class IndexReader {
 	 */
 	public Map<String, Integer> getPostings(String term) {
 		//TODO:YOU MUST IMPLEMENT THIS
-		FieldDictionary dictionary = readDictionary();
+		DocumentDictionary dictionary = readDictionary();
 
 		if(this.type == IndexType.TERM)
 		{
@@ -267,7 +267,22 @@ public class IndexReader {
 	}
 	
 
+	public Map<String, Integer>  notPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	{
+		Map <String, Integer> tempResult = new HashMap<String, Integer>();		
+		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
+			for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+				if (!temp1Entry.getKey().equals(temp2Entry.getKey())) {
+					tempResult.put(temp1Entry.getKey(),
+							temp1Entry.getValue() );
+				}
+			}
+		}
+		
+		return tempResult;
 
+	}
+	
 	
 	/**
 	 * Method to implement a simple boolean AND query on the given index

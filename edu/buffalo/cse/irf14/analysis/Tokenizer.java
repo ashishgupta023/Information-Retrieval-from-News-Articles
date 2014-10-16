@@ -47,6 +47,7 @@ public class Tokenizer {
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		TokenStream tokenStream = new TokenStream() ;
+		int processedLength = 0;
 		if(str != null && !str.isEmpty() )
 		{
 
@@ -55,7 +56,8 @@ public class Tokenizer {
 				Token token = new Token();
 				token.setTermText(tok);
 				token.setTermBuffer(tok.toCharArray());
-				
+				token.setPosIndex(str.indexOf(tok , processedLength));
+				processedLength = processedLength + tok.length() + 1;
 				tokenStream.add(token);
 
 			}

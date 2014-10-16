@@ -74,7 +74,7 @@ public class SearchRunner {
 			String operand = iter.next();
 			iter.remove();
 			String[] analyzedoperand = getAnalyzedTerm(operand);
-			reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0]));
+			reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0].toUpperCase()));
 			result = reader.getPostings(analyzedoperand[1]);
 		}
 		else if(executeQuery.size() >1)
@@ -85,7 +85,7 @@ public class SearchRunner {
 					String operand2 = null;
 					String operand1 = null;
 					String node = iter.next();
-					while( iter.hasNext() &&  (node != "#" || node != "+" ) )
+					while( iter.hasNext() &&  (!node.equals("#") && !node.equals("+") ) )
 					{
 						node = iter.next();
 					}
@@ -109,37 +109,53 @@ public class SearchRunner {
 						if(analyzedoperand1[0].equals(analyzedoperand1[0]))
 						{
 							
-							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0]));
+							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0].toUpperCase()));
 							if(operator.trim().equals("#"))
 							{
 								result = reader.orQuery(analyzedoperand1[1] , analyzedoperand2[1]);
 								if(executeQuery.size() != 0)
-									executeQuery.push("--RESULT--");	
+									iter.add("--RESULT--");	
 							}
 							else if( operator.trim().equals("+"))
 							{
-								result = reader.query(analyzedoperand1[1] , analyzedoperand2[1]);
-								if(executeQuery.size() != 0)
-									executeQuery.push("--RESULT--");	
+								if(analyzedoperand1[1].contains("<") || analyzedoperand2[1].contains("<"))
+								{
+									result = reader.notPostings(reader.getPostings(analyzedoperand1[1].replace("<", "").replace(">", "")),
+											reader.getPostings(analyzedoperand2[1].replace("<", "").replace(">", "")));
+								}
+								else
+								{
+									result = reader.query(analyzedoperand1[1] , analyzedoperand2[1]);
+									if(executeQuery.size() != 0)
+										iter.add("--RESULT--");	
+								}
 							}
 						}
 						else
 						{
-							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0]));
+							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0].toUpperCase()));
 							result = reader.getPostings(analyzedoperand1[1]);
-							reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand2[0]));
+							reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand2[0].toUpperCase()));
 							Map <String, Integer> tempresult = reader.getPostings(analyzedoperand2[1]);
 							if(operator.trim().equals("#"))
 							{
 								result = reader.unionPostings(result, tempresult);
 								if(executeQuery.size() != 0)
-									executeQuery.push("--RESULT--");	
+									iter.add("--RESULT--");	
 							}
 							if(operator.trim().equals("+"))
 							{
-								result = reader.intersectPostings(result, tempresult);
-								if(executeQuery.size() != 0)
-									executeQuery.push("--RESULT--");	
+								if(analyzedoperand1[1].contains("<") || analyzedoperand2[1].contains("<"))
+								{
+									result = reader.notPostings(reader.getPostings(analyzedoperand1[1].replace("<", "").replace(">", "")),
+											reader.getPostings(analyzedoperand2[1].replace("<", "").replace(">", "")));
+								}
+								else
+								{
+									result = reader.intersectPostings(result, tempresult);
+									if(executeQuery.size() != 0)
+										iter.add("--RESULT--");	
+								}
 							}
 						}
 					}
@@ -154,7 +170,7 @@ public class SearchRunner {
 						{
 							analyzedoperand = getAnalyzedTerm(operand1);
 						}
-						reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0]));
+						reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0].toUpperCase()));
 						if(operator.trim().equals("#"))
 						{
 							result = reader.unionPostings(result, reader.getPostings(analyzedoperand[1]));
@@ -163,9 +179,17 @@ public class SearchRunner {
 						}
 						if(operator.trim().equals("+"))
 						{
-							result = reader.intersectPostings(result, reader.getPostings(analyzedoperand[1]));
-							if(executeQuery.size() != 0)
-								executeQuery.push("--RESULT--");	
+							if(analyzedoperand[1].contains("<"))
+							{
+								result = reader.notPostings(result,
+										reader.getPostings(analyzedoperand[1].replace("<", "").replace(">", "")));
+							}
+							else
+							{
+								result = reader.intersectPostings(result, reader.getPostings(analyzedoperand[1]));
+								if(executeQuery.size() != 0)
+									executeQuery.push("--RESULT--");	
+							}
 						}
 					}
 				}
@@ -189,13 +213,13 @@ public class SearchRunner {
 		}
 		try {
 			TokenStream stream = tknizer.consume(string[1]);
-			if(string[0].trim().equals("TERM"))
+			if(string[0].trim().equals("Term"))
 				 analyzer = fact.getAnalyzerForField(FieldNames.CONTENT, stream);
-			else if(string[0].trim().equals("AUTHOR"))
+			else if(string[0].trim().equals("Author"))
 				 analyzer = fact.getAnalyzerForField(FieldNames.AUTHOR, stream);
-			else if(string[0].trim().equals("CATEGORY"))
+			else if(string[0].trim().equals("Category"))
 				 analyzer = fact.getAnalyzerForField(FieldNames.CATEGORY, stream);
-			else if(string[0].trim().equals("PLACE"))
+			else if(string[0].trim().equals("Place"))
 				 analyzer = fact.getAnalyzerForField(FieldNames.PLACE, stream);
 
 			while (analyzer.increment()) {

@@ -33,7 +33,7 @@ public class IndexWriter {
 	Index authorIndex;
 	Index placeIndex;
 	String indexDir;
-	FieldDictionary  dictionary ; 
+	DocumentDictionary  dictionary ; 
 	FileOutputStream fileOutputStream ;
 	ObjectOutputStream objectOutputStream ;
 	/**
@@ -49,7 +49,7 @@ public class IndexWriter {
 		factory = null;
 		analyzer = null;
 		fileOutputStream = null;
-		dictionary = new FieldDictionary();
+		dictionary = new DocumentDictionary();
 		objectOutputStream = null;
 		this.termIndex = new Index(IndexType.TERM);
 		this.categoryIndex = new Index(IndexType.CATEGORY);
@@ -73,14 +73,23 @@ public class IndexWriter {
 		{	
 			
 			int docID = 0;
+			int length = 0;
+			int posIndex = 0; 
 			docID = dictionary.insert(d.getField(FieldNames.FILEID)[0]);
 			
 			
 			// Index all documents
 			for(FieldNames name : FieldNames.values())
 			{
+				
+				if(name != FieldNames.CATEGORY && name != FieldNames.FILEID)
+				{
+					length = length + 1;
+				}
+				
 				content  = d.getField(name);
 				tokenizer = new Tokenizer();
+				
 				if(content != null)
 				{
 					stream  = tokenizer.consume(content[0]);
@@ -104,21 +113,25 @@ public class IndexWriter {
 								
 								if(token != null && !token.toString().isEmpty()  )
 								{
+									if(name != FieldNames.CATEGORY && name != FieldNames.FILEID)
+									{
+										 posIndex = length + token.getPosIndex();
+									}
 									if(name == FieldNames.FILEID || name == FieldNames.AUTHORORG || name == FieldNames.CONTENT || name == FieldNames.NEWSDATE || name == FieldNames.TITLE )
 									{
-										termIndex.put(token.toString(), docID);
+										termIndex.put(token.toString(), docID , posIndex );
 									}
 									else if(name == FieldNames.CATEGORY)
 									{
-										categoryIndex.put(token.toString(),docID );
+										categoryIndex.put(token.toString(),docID  , posIndex);
 									}
 									else if(name == FieldNames.AUTHOR)
 									{
-										authorIndex.put(token.toString(), docID);
+										authorIndex.put(token.toString(), docID , posIndex);
 									}
 									else if(name == FieldNames.PLACE)
 									{
-										placeIndex.put(token.toString(), docID);
+										placeIndex.put(token.toString(), docID , posIndex);
 									}
 								}
 								
@@ -126,10 +139,17 @@ public class IndexWriter {
 							}
 						
 						
-					}
+					}	
+				}
+				if(content != null && name != FieldNames.FILEID && name != FieldNames.CATEGORY)
+				{
+					length = length + content[0].length();
 				}
 				
 			}
+			
+			// Update Document length in the document dictionary
+			dictionary.insert(docID, length);
 			
 		}
 		catch(TokenizerException e)

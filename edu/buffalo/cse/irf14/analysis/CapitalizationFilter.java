@@ -17,6 +17,7 @@ public class CapitalizationFilter extends TokenFilter {
 				currToken = filterStream.next();
 			boolean tokenCaps = currToken.getTermText().matches("[A-Z]+");
 			
+			
 			if(!tokenCaps)
 			{
 				if(currToken.getTermText().matches("[A-Z][a-z]*"))
@@ -67,8 +68,10 @@ public class CapitalizationFilter extends TokenFilter {
 					}
 					else
 					{
-						currToken = filterStream.previous();
-						currToken = filterStream.previous();
+						if(filterStream.hasPrevious())
+							currToken = filterStream.previous();
+						if (filterStream.hasPrevious())
+							currToken = filterStream.previous();
 						currToken.setTermText(currToken.getTermText().toLowerCase());
 					}
 					

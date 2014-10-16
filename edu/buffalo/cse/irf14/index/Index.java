@@ -73,18 +73,18 @@ class Index implements Serializable {
 
 	
 	
-	public boolean put(String term, Integer docId) {
+	public boolean put(String term, Integer docId , Integer posIndex) {
 		/* Checking if term is previously present or not. */
 		
 
 		if(!this.termMap.containsKey(term)) {
 			PostingList postingValue = new PostingList();
-			postingValue.insert(docId);
+			postingValue.insert(docId , posIndex);
 			put(term, postingValue);	// inserting Key if it is not present		
 			return true;
 		}
 		PostingList storedValue = this.termMap.get(term);	// Appending Into a Posting List
-		storedValue.insert(docId);
+		storedValue.insert(docId, posIndex);
 		return true;
 	}
 	
@@ -97,7 +97,7 @@ class Index implements Serializable {
 		else return false;
 	}
 
-	public Map<String, Integer> get(String term, FieldDictionary dict) {
+	public Map<String, Integer> get(String term, DocumentDictionary dict) {
 		/* Returns Value if Key exists in our HashMap else it returns null. */
 		if(!this.termMap.containsKey(term)){
 			return null;

@@ -41,15 +41,16 @@ public class PostingList implements Serializable {
 		fileToDump = null;
 	}
 	
-	void insert(Integer docId) {
+	void insert(Integer docId, Integer posIndex) {
 		// appends Posting to end of Postings List..
 		Posting post = new Posting();
-		post.setDocId(docId);;
+		post.setDocId(docId);
+		post.setPosIndex(posIndex);
 		postingList.add(post);
 		collectionFrq++;
 		}
 	
-	Map<String, Integer> getPostingList(FieldDictionary dict) {
+	Map<String, Integer> getPostingList(DocumentDictionary dict) {
 		int numItems = postingList.size();
 		Map<String, Integer> posts = new HashMap<String, Integer>();
 
@@ -97,6 +98,7 @@ public class PostingList implements Serializable {
 		while (i < postingList.size()) {
 			if (postingList.get(i).getDocId() == postingList.get(j).getDocId()) {
 				postingList.get(j).incrTermFrq();
+				postingList.get(j).mergePosIndex(postingList.get(i).getPosIndex());
 				i++;
 			} else {
 				j++;

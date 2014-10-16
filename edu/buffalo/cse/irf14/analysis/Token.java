@@ -39,14 +39,6 @@ public class Token {
 		return termText;
 	}
 	
-	protected void setPosIndex(int i) {
-		posIndex = i;
-	}
-	
-	
-	protected String getPosIndex() {
-		return termText;
-	}
 	
 	
 	
@@ -118,5 +110,15 @@ public class Token {
 	public String toString() {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
 		return termText;
+	}
+	
+	public void setPosIndex(Integer pos)
+	{
+		this.posIndex = pos;
+	}
+	
+	public Integer getPosIndex()
+	{
+		return this.posIndex;
 	}
 }

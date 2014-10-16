@@ -5,10 +5,11 @@ package edu.buffalo.cse.irf14;
 
 import java.io.File;
 
-import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
+import edu.buffalo.cse.irf14.document.Parser;
+import edu.buffalo.cse.irf14.document.ParserException;
 import edu.buffalo.cse.irf14.index.IndexWriter;
-import edu.buffalo.cse.irf14.query.QueryParser;
+import edu.buffalo.cse.irf14.index.IndexerException;
 
 /**
  * @author nikhillo
@@ -41,9 +42,9 @@ public class Runner {
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
 		
-		SearchRunner testSearch = new SearchRunner(indexDir, ipDir, 'Q', null);
+		//SearchRunner testSearch = new SearchRunner(indexDir, ipDir, 'Q', null);
 		
-		testSearch.query("controlling interest", ScoringModel.TFIDF);
+		//testSearch.query("Place:greenwich AND Place:portland", ScoringModel.TFIDF);
 		//QueryParser parser = new QueryParser();
 		//parser.parse("\"hello world\"" , "OR");
 		//parser.parse("(black OR blue) AND bruises", "OR");
@@ -51,13 +52,13 @@ public class Runner {
 		//parser.parse("(Love NOT War) AND Category:(movies NOT crime)", "OR");
 		//parser.parse("(hello world you) OR (this is test)", "OR");
 		/*IndexReader reader = new IndexReader(indexDir, IndexType.TERM);
-		Map<String,Integer> res =  reader.orQuery("analyst","capital");
+		//Map<String,Integer> res =  reader.orQuery("analyst","capital");
 		
 		for (String key : res.keySet()) {
 		    System.out.println(key + " : " + res.get(key));
 		}*/
-		/* try {
-			for (String cat : catDirectories) {
+		 try {
+		cut:	for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
 				
@@ -66,9 +67,9 @@ public class Runner {
 				
 				for (String f : files) {
 					try {
-						d = Parser.parse(dir.getAbsolutePath() + File.separator + f);
+						d = Parser.parse(dir.getAbsolutePath() + File.separator + "0000078");
 						writer.addDocument(d);
-						//break cut;
+						break cut;
 					} catch (ParserException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -84,7 +85,7 @@ public class Runner {
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 	}
 
 }

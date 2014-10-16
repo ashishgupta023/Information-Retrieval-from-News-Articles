@@ -45,12 +45,12 @@ public class QueryParser {
 		defaultOperator = defaultOperator.replaceAll("AND", "+");
 		defaultOperator = defaultOperator.replaceAll("OR", "#");
 
-		String[] userQueryVals = userQuery.split("AND");
+		String[] userQueryVals = userQuery.split(" AND ");
 		String joinOpearator = "+";
 		String checkNotContains = "OR";
 		if(userQueryVals.length == 1)
 		{
-			 userQueryVals = userQuery.split("OR");
+			 userQueryVals = userQuery.split(" OR ");
 			 joinOpearator = "#";
 			 checkNotContains = "AND";
 			 
@@ -168,7 +168,7 @@ public class QueryParser {
 		
 		
 		
-		userQuery = userQuery.replaceAll("AND", "+");
+		userQuery = userQuery.replaceAll("AND", "+" );
 		userQuery = userQuery.replaceAll("OR", "#");
 		
 		char[] query = userQuery.toCharArray();
