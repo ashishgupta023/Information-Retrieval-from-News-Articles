@@ -5,11 +5,9 @@ package edu.buffalo.cse.irf14;
 
 import java.io.File;
 
+import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
-import edu.buffalo.cse.irf14.document.Parser;
-import edu.buffalo.cse.irf14.document.ParserException;
 import edu.buffalo.cse.irf14.index.IndexWriter;
-import edu.buffalo.cse.irf14.index.IndexerException;
 
 /**
  * @author nikhillo
@@ -42,9 +40,9 @@ public class Runner {
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
 		
-		//SearchRunner testSearch = new SearchRunner(indexDir, ipDir, 'Q', null);
+		SearchRunner testSearch = new SearchRunner(indexDir, ipDir, 'Q', null);
 		
-		//testSearch.query("Place:greenwich AND Place:portland", ScoringModel.TFIDF);
+		testSearch.query("Place:BOSTON", ScoringModel.TFIDF);
 		//QueryParser parser = new QueryParser();
 		//parser.parse("\"hello world\"" , "OR");
 		//parser.parse("(black OR blue) AND bruises", "OR");
@@ -57,8 +55,8 @@ public class Runner {
 		for (String key : res.keySet()) {
 		    System.out.println(key + " : " + res.get(key));
 		}*/
-		 try {
-		cut:	for (String cat : catDirectories) {
+	/*	 try {
+			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
 				
@@ -67,9 +65,9 @@ public class Runner {
 				
 				for (String f : files) {
 					try {
-						d = Parser.parse(dir.getAbsolutePath() + File.separator + "0000078");
+						d = Parser.parse(dir.getAbsolutePath() + File.separator + f);
 						writer.addDocument(d);
-						break cut;
+						//break cut;
 					} catch (ParserException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -85,7 +83,7 @@ public class Runner {
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }

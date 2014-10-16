@@ -97,7 +97,7 @@ class Index implements Serializable {
 		else return false;
 	}
 
-	public Map<String, Integer> get(String term, DocumentDictionary dict) {
+	Map<String, Map <Integer , ArrayList<Integer>>> get(String term, DocumentDictionary dict) {
 		/* Returns Value if Key exists in our HashMap else it returns null. */
 		if(!this.termMap.containsKey(term)){
 			return null;
@@ -107,16 +107,7 @@ class Index implements Serializable {
 		return value.getPostingList(dict);
 	}
 	
-	public Map<Integer, Integer> getFileIds(String term) {
-		// Returns Value if Key exists in our HashMap else it returns null. 
-		if(!this.termMap.containsKey(term)){
-			return null;
-		}
-		
-		PostingList value = termMap.get(term);
-		Map<Integer , Integer> map = value.getPostingListWithdocIDs();
-		return map;
-	}
+	
 	
 	
 

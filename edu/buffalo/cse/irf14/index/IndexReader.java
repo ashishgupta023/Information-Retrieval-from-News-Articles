@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -156,28 +157,42 @@ public class IndexReader {
 	public Map<String, Integer> getPostings(String term) {
 		//TODO:YOU MUST IMPLEMENT THIS
 		DocumentDictionary dictionary = readDictionary();
-
+		Map<String, Map <Integer , ArrayList<Integer>>> result = new HashMap<String, Map<Integer,ArrayList<Integer>>>();
 		if(this.type == IndexType.TERM)
 		{
 			termIndex = readIndex(IndexType.TERM);
-			return termIndex.get(term,dictionary);
+			result = termIndex.get(term,dictionary);
 		}
 		else if (this.type == IndexType.AUTHOR)
 		{
 			authorIndex = readIndex(IndexType.AUTHOR);
-			return authorIndex.get(term,dictionary);
+			result = authorIndex.get(term,dictionary);
 		}
 		else if(this.type == IndexType.CATEGORY)
 		{
 			categoryIndex = readIndex(IndexType.CATEGORY);
-			return categoryIndex.get(term,dictionary);
+			result =  categoryIndex.get(term,dictionary);
 		}
 		else if(this.type == IndexType.PLACE)
 		{
 			placeIndex = readIndex(IndexType.PLACE);
-			return placeIndex.get(term,dictionary);
+			result = placeIndex.get(term,dictionary);
 		}
-		else return null;
+
+		Map <String, Integer > finalResult = new HashMap<String, Integer>();
+		
+		for(Map.Entry<String, Map<Integer,ArrayList<Integer>>> temp1Entry : result.entrySet() )
+		{
+			String fileID = temp1Entry.getKey();
+			Integer numOccurences = -1;
+			Map<Integer,ArrayList<Integer>> value = temp1Entry.getValue();
+			for(Map.Entry<Integer, ArrayList<Integer>> valueEntry : value.entrySet())
+			{
+				numOccurences = valueEntry.getKey();
+			}
+			finalResult.put(fileID, numOccurences);
+		}
+			return finalResult;
 		
 	}
 	

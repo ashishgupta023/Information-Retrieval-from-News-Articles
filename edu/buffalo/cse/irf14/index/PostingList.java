@@ -50,16 +50,17 @@ public class PostingList implements Serializable {
 		collectionFrq++;
 		}
 	
-	Map<String, Integer> getPostingList(DocumentDictionary dict) {
+	Map<String, Map <Integer , ArrayList<Integer>>> getPostingList(DocumentDictionary dict) {
 		int numItems = postingList.size();
-		Map<String, Integer> posts = new HashMap<String, Integer>();
-
+		Map<String, Map <Integer , ArrayList<Integer>>> posts = new HashMap<String, Map <Integer , ArrayList<Integer>>>();
+		Map <Integer , ArrayList<Integer>> doc = new HashMap<Integer, ArrayList<Integer>>();
+		
 		for(int i = 0; i < numItems; i++) {
 			Posting post = postingList.get(i);
 			// docId to fileId lookup
 			String fileId = dict.get(post.getDocId());
-
-			posts.put(fileId, post.getTermFrq());
+			doc.put(post.getTermFrq(), post.getPosIndex());
+			posts.put(fileId,doc );
 		}
 		return posts;
 	}
@@ -67,16 +68,7 @@ public class PostingList implements Serializable {
 	
 	
 
-	Map<Integer, Integer> getPostingListWithdocIDs() {
-		int numItems = postingList.size();
-		Map<Integer, Integer> posts = new HashMap<Integer, Integer>();
-
-		for(int i = 0; i < numItems; i++) {
-			Posting post = postingList.get(i);
-			posts.put(post.getDocId(), post.getTermFrq());
-		}
-		return posts;
-	}
+	
 	
 	int getPostingListSize() {
 		return postingList.size();
