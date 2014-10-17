@@ -31,7 +31,7 @@ public class IndexReader {
 	private static Index authorIndex;
 	private static Index categoryIndex;
 	private static Index placeIndex;
-	private static DocumentDictionary  dict;
+	private static DocumentDictionary  dictionary;
 	FileInputStream fileInputStream;
 	ObjectInputStream objectInputStream;
 	
@@ -49,8 +49,11 @@ public class IndexReader {
 		this.indexDir = indexDir;
 		this.fileInputStream = null;
 		this.objectInputStream = null;
-		
-		
+		termIndex = null;
+		categoryIndex = null;
+		placeIndex = null;
+		authorIndex = null;
+		dictionary = null;
 	}
 	
 	private Index readIndex(IndexType type)
@@ -101,6 +104,45 @@ public class IndexReader {
 		return null;
 	}
 	
+	public Double getAverageDocumentLength()
+	{
+		if(dictionary == null)
+			dictionary = readDictionary();
+		Double avgDocLength = 0.0;
+		for(Map.Entry<Integer, HashMap<String, Integer>> entry: dictionary.dict.entrySet())
+		{
+			HashMap<String, Integer> val = entry.getValue();
+			for(Map.Entry<String, Integer> docEntry : val.entrySet())
+			{
+				avgDocLength = avgDocLength + docEntry.getValue();
+			}
+		}
+		
+		avgDocLength = avgDocLength / dictionary.dict.size();
+		
+		
+		return avgDocLength;
+	}
+	
+	public Integer getDocumentLength(String docID)
+	{
+		if(dictionary == null)
+			dictionary = readDictionary();
+		Integer docLength = 0;
+		for(Map.Entry<Integer, HashMap<String, Integer>> entry: dictionary.dict.entrySet())
+		{
+			HashMap<String, Integer> val = entry.getValue();
+			for(Map.Entry<String, Integer> docEntry : val.entrySet())
+			{
+				if (docEntry.getKey().equals(docID))
+				{
+					docLength  = docEntry.getValue();
+				}
+			}
+		}
+		return docLength;
+	}
+	
 	/**
 	 * Get total number of terms from the "key" dictionary associated with this 
 	 * index. A postings list is always created against the "key" dictionary
@@ -112,22 +154,26 @@ public class IndexReader {
 		
 		if(this.type == IndexType.TERM)
 		{
-			termIndex = readIndex(IndexType.TERM);
+			if(termIndex == null)
+				termIndex = readIndex(IndexType.TERM);
 			return termIndex.getNumTerms();
 		}
 		else if (this.type == IndexType.AUTHOR)
 		{
-			authorIndex = readIndex(IndexType.AUTHOR);
+			if(authorIndex == null)
+				authorIndex = readIndex(IndexType.AUTHOR);
 			return authorIndex.getNumTerms();
 		}
 		else if(this.type == IndexType.CATEGORY)
 		{
-			categoryIndex = readIndex(IndexType.CATEGORY);
+			if(categoryIndex ==  null)
+				categoryIndex = readIndex(IndexType.CATEGORY);
 			return categoryIndex.getNumTerms();
 		}
 		else if(this.type == IndexType.PLACE)
 		{
-			placeIndex = readIndex(IndexType.PLACE);
+			if( placeIndex == null )
+				placeIndex = readIndex(IndexType.PLACE);
 			return placeIndex.getNumTerms();
 		}
 		else return -1;
@@ -140,43 +186,95 @@ public class IndexReader {
 	 */
 	public int getTotalValueTerms() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		DocumentDictionary dictionary = readDictionary();
+		if(dictionary == null)
+			dictionary = readDictionary();
 		if(this.type == IndexType.TERM || this.type == IndexType.AUTHOR || this.type == IndexType.PLACE || this.type == IndexType.CATEGORY)
 			return dictionary.dict.size();
 		else return -1;
 	}
 	
-	/**
+	public Map<String, Map <String , ArrayList<Integer>>> getPostingsWithPosIndexes(String term) {
+		//TODO:YOU MUST IMPLEMENT THIS
+		if(dictionary == null)
+			dictionary = readDictionary();
+		Map<String , ArrayList<Integer>> result = new HashMap<String, ArrayList<Integer>>();
+		if(this.type == IndexType.TERM)
+		{
+			if(termIndex == null)
+				termIndex = readIndex(IndexType.TERM);
+			result = termIndex.get(term,dictionary);
+		}
+		else if (this.type == IndexType.AUTHOR)
+		{
+			if(authorIndex == null)
+				authorIndex = readIndex(IndexType.AUTHOR);
+			result = authorIndex.get(term,dictionary);
+		}
+		else if(this.type == IndexType.CATEGORY)
+		{
+			if(categoryIndex == null)
+				categoryIndex = readIndex(IndexType.CATEGORY);
+			result =  categoryIndex.get(term,dictionary);
+		}
+		else if(this.type == IndexType.PLACE)
+		{
+			if(placeIndex == null)
+				placeIndex = readIndex(IndexType.PLACE);
+			result = placeIndex.get(term,dictionary);
+		}
+
+		Map<String, Map<String , ArrayList<Integer>>> finaResult = new HashMap<String, Map<String,ArrayList<Integer>>>();
+		if(result != null)
+		{
+			for(Map.Entry<String , ArrayList<Integer>> entry : result.entrySet())
+			{
+				String key = entry.getKey();
+				Map<String , ArrayList<Integer>> docResult = new HashMap<String, ArrayList<Integer>>();
+				docResult.put(term, entry.getValue());
+				finaResult.put(key, docResult);
+			}
+		}
+		else
+		{
+			finaResult = null;
+		}
+		
+		return finaResult;
+		
+	}
+	
+	/*
+	*//**
 	 * Method to get the postings for a given term. You can assume that
 	 * the raw string that is used to query would be passed through the same
 	 * Analyzer as the original field would have been.
 	 * @param term : The "analyzed" term to get postings for
 	 * @return A Map containing the corresponding fileid as the key and the 
 	 * number of occurrences as values if the given term was found, null otherwise.
-	 */
+	 *//*
 	public Map<String, Integer> getPostings(String term) {
 		//TODO:YOU MUST IMPLEMENT THIS
-		DocumentDictionary dictionary = readDictionary();
+		 dictionary = readDictionary();
 		Map<String, Map <Integer , ArrayList<Integer>>> result = new HashMap<String, Map<Integer,ArrayList<Integer>>>();
 		if(this.type == IndexType.TERM)
 		{
 			termIndex = readIndex(IndexType.TERM);
-			result = termIndex.get(term,dictionary);
+			result = getPostingsWithPosIndexes(term);
 		}
 		else if (this.type == IndexType.AUTHOR)
 		{
 			authorIndex = readIndex(IndexType.AUTHOR);
-			result = authorIndex.get(term,dictionary);
+			result = getPostingsWithPosIndexes(term);
 		}
 		else if(this.type == IndexType.CATEGORY)
 		{
 			categoryIndex = readIndex(IndexType.CATEGORY);
-			result =  categoryIndex.get(term,dictionary);
+			result =  getPostingsWithPosIndexes(term);
 		}
 		else if(this.type == IndexType.PLACE)
 		{
 			placeIndex = readIndex(IndexType.PLACE);
-			result = placeIndex.get(term,dictionary);
+			result = getPostingsWithPosIndexes(term);
 		}
 
 		Map <String, Integer > finalResult = new HashMap<String, Integer>();
@@ -195,7 +293,7 @@ public class IndexReader {
 			return finalResult;
 		
 	}
-	
+	*/
 	/**
 	 * Method to get the top k terms from the index in terms of the total number
 	 * of occurrences.
@@ -207,37 +305,45 @@ public class IndexReader {
 		//TODO YOU MUST IMPLEMENT THIS
 		if(this.type == IndexType.TERM)
 		{
-			termIndex = readIndex(IndexType.TERM);
+			if(termIndex == null)
+				termIndex = readIndex(IndexType.TERM);
 			return termIndex.getTopK(k);
 		}
 		else if (this.type == IndexType.AUTHOR)
 		{
-			authorIndex = readIndex(IndexType.AUTHOR);
+			if(authorIndex == null)
+				authorIndex = readIndex(IndexType.AUTHOR);
 			return authorIndex.getTopK(k);
 		}
 		else if(this.type == IndexType.CATEGORY)
 		{
-			categoryIndex = readIndex(IndexType.CATEGORY);
+			if(categoryIndex == null)
+				categoryIndex = readIndex(IndexType.CATEGORY);
 			return categoryIndex.getTopK(k);
 		}
 		else if(this.type == IndexType.PLACE)
 		{
-			placeIndex = readIndex(IndexType.PLACE);
+			if(placeIndex == null)
+				placeIndex = readIndex(IndexType.PLACE);
 			return placeIndex.getTopK(k);
 		}
 			else return null;	
 		}
 	
 	
-	public Map<String, Integer>  intersectPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	public Map<String, Map<String ,  ArrayList<Integer>>>  intersectPostings (Map<String, Map<String ,  ArrayList<Integer>>> temp1 ,Map<String, Map<String ,  ArrayList<Integer>>> temp2)
 	{
-		Map <String, Integer> tempResult = new HashMap<String, Integer>();
+		Map<String, Map<String ,  ArrayList<Integer>>> tempResult = new HashMap<String, Map<String,ArrayList<Integer>>>();
 		
-		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
-			for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
+			for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
 				if (temp1Entry.getKey().equals(temp2Entry.getKey())) {
-					tempResult.put(temp1Entry.getKey(),
-							temp1Entry.getValue() + temp2Entry.getValue());
+					
+					Map <String , ArrayList<Integer>> termDetails = new HashMap<String, ArrayList<Integer>>();
+					
+					termDetails.putAll(temp1Entry.getValue());
+					termDetails.putAll(temp2Entry.getValue());
+					tempResult.put(temp1Entry.getKey(), termDetails);
 				}
 			}
 		}
@@ -245,21 +351,23 @@ public class IndexReader {
 
 	}
 	
-	public Map<String, Integer>  unionPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	public Map<String,  Map<String ,  ArrayList<Integer>>>  unionPostings (Map<String,  Map<String ,  ArrayList<Integer>>> temp1 ,Map<String,  Map<String ,  ArrayList<Integer>>> temp2)
 	{
-		Map <String, Integer> tempResult = new HashMap<String, Integer>();
+		Map <String,  Map<String ,  ArrayList<Integer>>> tempResult = new HashMap<String,  Map<String ,  ArrayList<Integer>>>();
 		
 		
-		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
-			for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+		for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
+			for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
 				if (temp1Entry.getKey().equals(temp2Entry.getKey())) {
-					tempResult.put(temp1Entry.getKey(),
-							temp1Entry.getValue() + temp2Entry.getValue());
+					Map <String , ArrayList<Integer>> termDetails = new HashMap<String, ArrayList<Integer>>();
+					termDetails.putAll(temp1Entry.getValue());
+					termDetails.putAll(temp2Entry.getValue());
+					tempResult.put(temp1Entry.getKey(), termDetails);
 				}
 			}
 		}
 		
-		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
+		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
 				if (!tempResult.containsKey(temp1Entry.getKey())) {
 					tempResult.put(temp1Entry.getKey(),
 							temp1Entry.getValue());
@@ -267,7 +375,7 @@ public class IndexReader {
 			
 		}
 		
-		for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
 			if (!tempResult.containsKey(temp2Entry.getKey())) {
 				if (!temp2Entry.getKey().equals(temp2Entry.getKey())) {
 					tempResult.put(temp2Entry.getKey(),
@@ -282,11 +390,11 @@ public class IndexReader {
 	}
 	
 
-	public Map<String, Integer>  notPostings (Map<String, Integer> temp1 ,Map<String, Integer> temp2)
+	public Map<String,  Map<String ,  ArrayList<Integer>>>  notPostings (Map<String,  Map<String ,  ArrayList<Integer>>> temp1 ,Map<String,  Map<String ,  ArrayList<Integer>>> temp2)
 	{
-		Map <String, Integer> tempResult = new HashMap<String, Integer>();		
-		for (Map.Entry<String, Integer> temp1Entry : temp1.entrySet()) {
-			for (Map.Entry<String, Integer> temp2Entry : temp2.entrySet()) {
+		Map <String,  Map<String ,  ArrayList<Integer>>> tempResult = new HashMap<String,  Map<String ,  ArrayList<Integer>>>();		
+		for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
+			for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
 				if (!temp1Entry.getKey().equals(temp2Entry.getKey())) {
 					tempResult.put(temp1Entry.getKey(),
 							temp1Entry.getValue() );
@@ -309,81 +417,52 @@ public class IndexReader {
 	 * if the given term list returns no results
 	 * BONUS ONLY
 	 */
-	public Map<String, Integer> query(String...terms ) 
+	public Map<String, Map<String , ArrayList<Integer> >> query(String...terms ) 
 	{
 		//TODO : BONUS ONLY
-		HashMap<String, Integer> result = new LinkedHashMap<String, Integer>();
+		Map<String,  Map<String , ArrayList<Integer> >> result = new HashMap<String, Map<String,ArrayList<Integer>>>();
 		
-		ArrayList<Map<String, Integer>> termsPostingListsArray = new ArrayList<Map<String, Integer>>();
+		ArrayList<Map<String, Map<String , ArrayList<Integer> >>> termsPostingListsArray = new ArrayList<Map<String,Map<String,ArrayList<Integer>>>>();
 		for (int i = 0; i < terms.length; i++) {
-			termsPostingListsArray.add(getPostings(terms[i]));
+			termsPostingListsArray.add(getPostingsWithPosIndexes(terms[i]));
 		}
 		
 		if(terms.length == 1)
 			return termsPostingListsArray.get(0);
 		else if(terms.length  > 1)
 		{
-			Map<String, Integer> tempMap = intersectPostings(
+			 result = intersectPostings(
 					termsPostingListsArray.get(0), termsPostingListsArray.get(1));
 			for (int i = 2; i < terms.length; i++) {
-				tempMap = intersectPostings(tempMap, termsPostingListsArray.get(i));
+				result = intersectPostings(result, termsPostingListsArray.get(i));
 			}
 			
-			List<Entry<String, Integer>> unsortedEntries = new LinkedList<Map.Entry<String, Integer>>(
-					tempMap.entrySet());
-			
-			Collections.sort(unsortedEntries, new Comparator<Entry<String, Integer>>() {
-
-				@Override
-				public int compare(Entry<String, Integer> val1,
-						Entry<String, Integer> val2) {
-					return val2.getValue().compareTo(val1.getValue());
-				}
-			});
-
-			for (Map.Entry<String, Integer> entry : unsortedEntries) {
-				result.put(entry.getKey(), entry.getValue());
-			}
 			
 		}
 		return result;
 	}
 	
-	public Map<String, Integer> orQuery(String...terms ) 
+	public Map<String,  Map<String , ArrayList<Integer> >> orQuery(String...terms ) 
 	{
 		//TODO : BONUS ONLY
-		HashMap <String, Integer> result = new LinkedHashMap<String, Integer>();
+		Map<String,  Map<String , ArrayList<Integer> >> result = new HashMap<String, Map<String,ArrayList<Integer>>>();
 		
-		ArrayList<Map<String, Integer>> termsPostingListsArray = new ArrayList<Map<String, Integer>>();
+		ArrayList<Map<String, Map<String , ArrayList<Integer> >>> termsPostingListsArray = new ArrayList<Map<String,Map<String,ArrayList<Integer>>>>();
 		for (int i = 0; i < terms.length; i++) {
-			termsPostingListsArray.add(getPostings(terms[i]));
+			termsPostingListsArray.add(getPostingsWithPosIndexes(terms[i]));
 		}
 		
 		if(terms.length == 1)
 			return termsPostingListsArray.get(0);
 		else if(terms.length  > 1)
 		{
-			Map<String, Integer> tempMap = unionPostings(
+			 result = unionPostings(
 					termsPostingListsArray.get(0), termsPostingListsArray.get(1));
 			for (int i = 2; i < terms.length; i++) {
-				tempMap = unionPostings(tempMap, termsPostingListsArray.get(i));
+				result = unionPostings(result, termsPostingListsArray.get(i));
 			}
 			
-			List<Entry<String, Integer>> unsortedEntries = new LinkedList<Map.Entry<String, Integer>>(
-					tempMap.entrySet());
 			
-			 Collections.sort(unsortedEntries, new Comparator<Entry<String, Integer>>() {
-
-				@Override
-				public int compare(Entry<String, Integer> val1,
-						Entry<String, Integer> val2) {
-					return val2.getValue().compareTo(val1.getValue());
-				}
-			});
-
-			for (Map.Entry<String, Integer> entry : unsortedEntries) {
-				result.put(entry.getKey(), entry.getValue());
-			}
 			
 		}
 		return result;

@@ -201,10 +201,10 @@ public class QueryParser {
 								if(pushValue.contains("<"))
 								{
 									pushValue = pushValue.replace("<", "").replace(">", "");
-									pushValue = "<TERM:".concat(pushValue).concat(">");
+									pushValue = "<Term:".concat(pushValue).concat(">");
 								}
 								else
-									pushValue = "TERM:".concat(pushValue);
+									pushValue = "Term:".concat(pushValue);
 							}
 							//queryStack.push(pushValue);
 							//queryObject.updateEvalOrder(pushValue);
@@ -227,10 +227,10 @@ public class QueryParser {
 						if(pushValue.contains("<"))
 						{
 							pushValue = pushValue.replace("<", "").replace(">", "");
-							pushValue = "<TERM:".concat(pushValue).concat(">");
+							pushValue = "<Term:".concat(pushValue).concat(">");
 						}
 						else
-							pushValue = "TERM:".concat(pushValue);					
+							pushValue = "Term:".concat(pushValue);					
 						}
 					queryStack.push(pushValue);
 					queryObject.updateEvalOrder(pushValue);

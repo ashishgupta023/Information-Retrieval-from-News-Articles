@@ -56,7 +56,7 @@ public class Tokenizer {
 				Token token = new Token();
 				token.setTermText(tok);
 				token.setTermBuffer(tok.toCharArray());
-				token.setPosIndex(str.indexOf(tok , processedLength));
+				token.setPosIndex(str.toLowerCase().indexOf(tok.toLowerCase() , processedLength));
 				processedLength = processedLength + tok.length() + 1;
 				tokenStream.add(token);
 

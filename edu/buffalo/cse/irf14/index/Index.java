@@ -71,7 +71,10 @@ class Index implements Serializable {
 
 	}
 
-	
+	public PostingList getPostingList(String term)
+	{
+		return null;
+	}
 	
 	public boolean put(String term, Integer docId , Integer posIndex) {
 		/* Checking if term is previously present or not. */
@@ -97,18 +100,16 @@ class Index implements Serializable {
 		else return false;
 	}
 
-	Map<String, Map <Integer , ArrayList<Integer>>> get(String term, DocumentDictionary dict) {
+	Map<String , ArrayList<Integer>> get(String term, DocumentDictionary dict) {
 		/* Returns Value if Key exists in our HashMap else it returns null. */
 		if(!this.termMap.containsKey(term)){
 			return null;
 		}
-		
 		PostingList value = termMap.get(term);
-		return value.getPostingList(dict);
+
+		 Map <String , ArrayList<Integer>> temp = value.getPostingList(dict);
+		return temp;
 	}
-	
-	
-	
 	
 
 	public int sortAndAggregate() {

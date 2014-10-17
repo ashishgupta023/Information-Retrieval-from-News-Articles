@@ -40,9 +40,9 @@ public class Runner {
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
 		
-		SearchRunner testSearch = new SearchRunner(indexDir, ipDir, 'Q', null);
+		SearchRunner testSearch = new SearchRunner(indexDir, indexDir + File.separator + "snippets", 'Q', null);
 		
-		testSearch.query("Place:BOSTON", ScoringModel.TFIDF);
+		testSearch.query("mlns AND dlrs", ScoringModel.TFIDF);
 		//QueryParser parser = new QueryParser();
 		//parser.parse("\"hello world\"" , "OR");
 		//parser.parse("(black OR blue) AND bruises", "OR");
@@ -54,10 +54,10 @@ public class Runner {
 		
 		for (String key : res.keySet()) {
 		    System.out.println(key + " : " + res.get(key));
-		}*/
-	/*	 try {
+		}
+		/* try {
 			for (String cat : catDirectories) {
-				dir = new File(ipDir+ File.separator+ cat);
+				dir = new File(ipDir+ File.separator+ "acq");
 				files = dir.list();
 				
 				if (files == null)
@@ -74,6 +74,7 @@ public class Runner {
 					} 
 					
 				}
+				break;
 				
 			}
 			
@@ -83,7 +84,7 @@ public class Runner {
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
-	}
+		} */
+	} 
 
 }

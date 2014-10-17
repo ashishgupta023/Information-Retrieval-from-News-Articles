@@ -151,6 +151,7 @@ public class IndexWriter {
 			// Update Document length in the document dictionary
 			dictionary.insert(docID, length);
 			
+			
 		}
 		catch(TokenizerException e)
 		{
