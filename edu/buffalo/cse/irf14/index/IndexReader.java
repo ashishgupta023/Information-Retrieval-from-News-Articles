@@ -3,6 +3,8 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,6 +33,7 @@ public class IndexReader {
 	private static Index authorIndex;
 	private static Index categoryIndex;
 	private static Index placeIndex;
+	private static Map<String , Map<String , Integer>> forwardIndex;
 	private static DocumentDictionary  dictionary;
 	FileInputStream fileInputStream;
 	ObjectInputStream objectInputStream;
@@ -53,14 +56,21 @@ public class IndexReader {
 		categoryIndex = null;
 		placeIndex = null;
 		authorIndex = null;
+		forwardIndex = null;
 		dictionary = null;
+	}
+	
+	
+	public IndexType getType(){
+		return type;
 	}
 	
 	private Index readIndex(IndexType type)
 	{
 		try {
+			
 			fileInputStream = new FileInputStream(this.indexDir+ File.separator + type.toString() + File.separator + type.toString() );
-			objectInputStream = new ObjectInputStream(fileInputStream);
+			objectInputStream = new ObjectInputStream(new BufferedInputStream(fileInputStream));
 			Index tempIndex = (Index)objectInputStream.readObject();
 			objectInputStream.close();
 			fileInputStream.close();
@@ -80,11 +90,42 @@ public class IndexReader {
 		return null;
 	}
 	
+	
+	public Map<String , Map<String, Integer>> readForwardIndex()
+	{
+		if(forwardIndex == null)
+		{
+			try {
+				fileInputStream = new FileInputStream(this.indexDir+ File.separator + "forwardIndex" );
+				objectInputStream = new ObjectInputStream(new BufferedInputStream(fileInputStream));
+				Map<String , Map<String, Integer>> forwardIndex = (Map<String , Map<String, Integer>>)objectInputStream.readObject();
+				objectInputStream.close();
+				fileInputStream.close();
+	
+				return forwardIndex;
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch(IOException e)
+			{
+				e.printStackTrace();
+			} catch (ClassNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			return forwardIndex;
+		}
+		return null;
+	}
+	
 	private DocumentDictionary readDictionary()
 	{
 		try {
 			fileInputStream = new FileInputStream(this.indexDir+ File.separator + "dictionary" );
-			objectInputStream = new ObjectInputStream(fileInputStream);
+			objectInputStream = new ObjectInputStream(new BufferedInputStream(fileInputStream));
 			DocumentDictionary tempDict = (DocumentDictionary)objectInputStream.readObject();
 			objectInputStream.close();
 			fileInputStream.close();
@@ -334,6 +375,9 @@ public class IndexReader {
 	public Map<String, Map<String ,  ArrayList<Integer>>>  intersectPostings (Map<String, Map<String ,  ArrayList<Integer>>> temp1 ,Map<String, Map<String ,  ArrayList<Integer>>> temp2)
 	{
 		Map<String, Map<String ,  ArrayList<Integer>>> tempResult = new HashMap<String, Map<String,ArrayList<Integer>>>();
+
+		if(temp1 != null && temp2 != null)
+		{
 		
 		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
 			for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
@@ -347,6 +391,7 @@ public class IndexReader {
 				}
 			}
 		}
+		}
 		return tempResult;
 
 	}
@@ -355,25 +400,34 @@ public class IndexReader {
 	{
 		Map <String,  Map<String ,  ArrayList<Integer>>> tempResult = new HashMap<String,  Map<String ,  ArrayList<Integer>>>();
 		
+		if(temp1 != null && temp1.size() > 0)
+		{
 		
-		for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
-			for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
-				if (temp1Entry.getKey().equals(temp2Entry.getKey())) {
-					Map <String , ArrayList<Integer>> termDetails = new HashMap<String, ArrayList<Integer>>();
-					termDetails.putAll(temp1Entry.getValue());
-					termDetails.putAll(temp2Entry.getValue());
-					tempResult.put(temp1Entry.getKey(), termDetails);
+			for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
+				for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
+					if (temp1Entry.getKey().equals(temp2Entry.getKey())) {
+						Map <String , ArrayList<Integer>> termDetails = new HashMap<String, ArrayList<Integer>>();
+						termDetails.putAll(temp1Entry.getValue());
+						termDetails.putAll(temp2Entry.getValue());
+						tempResult.put(temp1Entry.getKey(), termDetails);
+					}
 				}
 			}
 		}
 		
-		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
-				if (!tempResult.containsKey(temp1Entry.getKey())) {
-					tempResult.put(temp1Entry.getKey(),
-							temp1Entry.getValue());
-				}
-			
+		if(temp2 != null && temp2.size() > 0)
+		{
+			for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
+					if (!tempResult.containsKey(temp1Entry.getKey())) {
+						tempResult.put(temp1Entry.getKey(),
+								temp1Entry.getValue());
+					}
+				
+			}
 		}
+		
+		if( temp1 != null && temp2 != null && temp1.size() > 0 && temp2.size() > 0)
+		{
 		
 		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
 			if (!tempResult.containsKey(temp2Entry.getKey())) {
@@ -383,7 +437,7 @@ public class IndexReader {
 				}
 			}
 		}
-		
+		}
 		
 		return tempResult;
 

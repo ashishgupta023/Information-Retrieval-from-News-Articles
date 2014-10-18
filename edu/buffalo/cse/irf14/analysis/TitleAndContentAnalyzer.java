@@ -62,7 +62,15 @@ public class TitleAndContentAnalyzer implements Analyzer {
 			}
 		 this.stream.reset();
 		 
-
+		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.CAPITALIZATION, this.stream);
+		 if(this.stream != null)
+			{
+				while(this.filter.increment())
+				{
+					
+				}
+			}
+		 this.stream.reset();
 		 
 		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.STEMMER, this.stream);
 		 if(this.stream != null)
@@ -74,15 +82,7 @@ public class TitleAndContentAnalyzer implements Analyzer {
 			}
 		 this.stream.reset();
 		 
-		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.CAPITALIZATION, this.stream);
-		 if(this.stream != null)
-			{
-				while(this.filter.increment())
-				{
-					
-				}
-			}
-		 this.stream.reset();
+		
 		 
 		
 		 this.filter = this.tokenFilterFactory.getFilterByType(TokenFilterType.SYMBOL, this.stream);

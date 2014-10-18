@@ -3,7 +3,12 @@
  */
 package edu.buffalo.cse.irf14;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 
 import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
@@ -39,10 +44,35 @@ public class Runner {
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
+		PrintStream fileOutputStream  = null; 
+		try {
+			 fileOutputStream = new PrintStream(new File(indexDir + File.separator + "output"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		SearchRunner testSearch = new SearchRunner(indexDir, indexDir + File.separator + "snippets", 'Q', null);
+		SearchRunner testSearch = new SearchRunner(indexDir, indexDir + File.separator + "snippets", 'Q', System.out);
 		
-		testSearch.query("mlns AND dlrs", ScoringModel.TFIDF);
+		//testSearch.query("adobe", ScoringModel.TFIDF);
+
+		while(true)
+		{
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	        System.out.print("Enter Query : ");
+	        try {
+				String s = br.readLine();
+				testSearch.query(s, ScoringModel.TFIDF);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        System.out.println();
+		}
+		
+		
+		//File file = new File(indexDir + File.separator + "input.txt");
+		//testSearch.query(file);
 		//QueryParser parser = new QueryParser();
 		//parser.parse("\"hello world\"" , "OR");
 		//parser.parse("(black OR blue) AND bruises", "OR");
@@ -55,9 +85,9 @@ public class Runner {
 		for (String key : res.keySet()) {
 		    System.out.println(key + " : " + res.get(key));
 		}
-		/* try {
+		*//* try {
 			for (String cat : catDirectories) {
-				dir = new File(ipDir+ File.separator+ "acq");
+				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
 				
 				if (files == null)
@@ -71,10 +101,9 @@ public class Runner {
 					} catch (ParserException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} 
-					
+					}
 				}
-				break;
+				
 				
 			}
 			
@@ -85,6 +114,6 @@ public class Runner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} */
-	} 
+	}  
 
 }

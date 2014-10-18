@@ -3,10 +3,13 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
@@ -36,6 +39,7 @@ public class IndexWriter {
 	DocumentDictionary  dictionary ; 
 	FileOutputStream fileOutputStream ;
 	ObjectOutputStream objectOutputStream ;
+	Map<String , Map <String , Integer>> forwardIndex ;
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
@@ -55,6 +59,7 @@ public class IndexWriter {
 		this.categoryIndex = new Index(IndexType.CATEGORY);
 		this.authorIndex = new Index(IndexType.AUTHOR);
 		this.placeIndex = new Index(IndexType.PLACE);
+		forwardIndex = new HashMap<String, Map<String,Integer>>();
 		
 	}
 	
@@ -75,6 +80,7 @@ public class IndexWriter {
 			int docID = 0;
 			int length = 0;
 			int posIndex = 0; 
+		
 			docID = dictionary.insert(d.getField(FieldNames.FILEID)[0]);
 			
 			
@@ -110,6 +116,28 @@ public class IndexWriter {
 							while(stream.hasNext())
 							{
 								Token token = stream.next();
+								
+								if(forwardIndex.containsKey(d.getField(FieldNames.FILEID)[0]))
+								{
+									Map<String , Integer> tFs = forwardIndex.get(d.getField(FieldNames.FILEID)[0]);
+									
+									if(tFs.containsKey(token.toString()))
+									{
+										tFs.put(token.toString(), tFs.get(token.toString()) + 1);
+									}
+									else
+									{
+										tFs.put(token.toString(), 1);
+									}
+									forwardIndex.put(d.getField(FieldNames.FILEID)[0], tFs);
+								}
+								else
+								{
+									Map<String , Integer> tFs = new HashMap<String, Integer>();
+									tFs.put(token.toString(), 1);
+									forwardIndex.put(d.getField(FieldNames.FILEID)[0], tFs);
+								}
+								
 								
 								if(token != null && !token.toString().isEmpty()  )
 								{
@@ -159,6 +187,47 @@ public class IndexWriter {
 		}
 		
 	}
+	
+	public void dumpForwardIndex()
+	{
+		String BasePath = this.indexDir;
+		
+		String indexBaseDirPath = BasePath +File.separator;
+		File indexBaseDir = new File(indexBaseDirPath);
+		
+		// create this Directory of not exists..
+		if(!indexBaseDir.exists()) {
+			indexBaseDir.mkdir();
+		}
+		
+		if(forwardIndex!=null)
+		{
+		
+		String indexBaseFile = indexBaseDirPath + File.separator + "forwardIndex";
+
+		
+		File filehandle = new File(indexBaseFile );
+
+		try {
+			 fileOutputStream =  new FileOutputStream(filehandle);
+			 objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(fileOutputStream));
+			objectOutputStream.writeObject(forwardIndex);
+			
+			objectOutputStream.close();
+			fileOutputStream.close();
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	
+	}
+	}
+	
+	
 	public void dumpIntoDisk(Index index) {		// this dumps entire list to disk
 		String BasePath = this.indexDir;
 	
@@ -180,7 +249,7 @@ public class IndexWriter {
 
 		try {
 			 fileOutputStream =  new FileOutputStream(filehandle);
-			 objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			 objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(fileOutputStream));
 			objectOutputStream.writeObject(index);
 			
 			objectOutputStream.close();
@@ -218,7 +287,7 @@ public class IndexWriter {
 
 		try {
 			 fileOutputStream =  new FileOutputStream(filehandle);
-			 objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			 objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(fileOutputStream));
 			objectOutputStream.writeObject(dictionary);
 			
 			objectOutputStream.close();
@@ -247,6 +316,7 @@ public class IndexWriter {
 		this.authorIndex.sortAndAggregate();
 		this.categoryIndex.sortAndAggregate();
 		dumpDictionary();
+		dumpForwardIndex();
 		dumpIntoDisk(termIndex);
 		dumpIntoDisk(placeIndex);
 		dumpIntoDisk(categoryIndex);

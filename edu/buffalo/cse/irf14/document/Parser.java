@@ -83,6 +83,19 @@ public class Parser {
 										content = line.substring(hyphenIndex+1 , line.length());
 									}
 								}
+								else
+								{
+									placeDate = false;
+									if(content == null)
+									{
+										content = line;
+									}
+									else
+									{
+										content = content.concat(" ");
+										content = content.concat(line);
+									}
+								}
 							}
 							else
 							{

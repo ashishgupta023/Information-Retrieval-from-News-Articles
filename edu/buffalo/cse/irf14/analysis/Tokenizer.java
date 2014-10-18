@@ -53,12 +53,15 @@ public class Tokenizer {
 
 			String[] strTok = str.split(regexDelimiter);
 			for (String tok : strTok) {
-				Token token = new Token();
-				token.setTermText(tok);
-				token.setTermBuffer(tok.toCharArray());
-				token.setPosIndex(str.toLowerCase().indexOf(tok.toLowerCase() , processedLength));
-				processedLength = processedLength + tok.length() + 1;
-				tokenStream.add(token);
+				if(!tok.trim().isEmpty() && tok != null)
+				{
+					Token token = new Token();
+					token.setTermText(tok);
+					token.setTermBuffer(tok.toCharArray());
+					token.setPosIndex(str.toLowerCase().indexOf(tok.toLowerCase() , processedLength));
+					processedLength = processedLength + tok.length() + 1;
+					tokenStream.add(token);
+				}
 
 			}
 		}
