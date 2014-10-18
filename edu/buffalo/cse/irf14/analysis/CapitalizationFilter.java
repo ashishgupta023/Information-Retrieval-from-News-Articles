@@ -18,56 +18,22 @@ public class CapitalizationFilter extends TokenFilter {
 			boolean tokenCaps = currToken.getTermText().matches("[A-Z]+");
 			
 			
-			if(!tokenCaps)
+			if(tokenCaps)
 			{
-				if(currToken.getTermText().matches("[A-Z][a-z]*"))
-				{
-					if(filterStream.hasNext())
-					{
-						currToken = filterStream.next();
-						String nextValue = currToken.getTermText();
-						if(currToken.getTermText().matches("[A-Z][a-z]*"))
-						{
-							filterStream.remove();
-							if (filterStream.hasPrevious())
-								currToken = filterStream.previous();
-							currToken.setTermText(currToken.getTermText() + " " + nextValue);
-						}
-						else
-						{
-							if (filterStream.hasPrevious())
-								currToken = filterStream.previous();
-							if (filterStream.hasPrevious())
-								currToken = filterStream.previous();
-							currToken.setTermText(currToken.getTermText().toLowerCase());
-						}
-					}
-				}
-				
-			}
-			else
-			{
-				
-
-				
+	
 				if (filterStream.hasNext())
 				{
 					currToken = filterStream.next();
 					if(currToken.getTermText().matches("[A-Z]+"))
 					{
-						if (filterStream.hasNext())
-							currToken = filterStream.next();
-							if(currToken.getTermText().matches("[A-Z]+"))
-							{
+						
 								currToken.setTermText(currToken.getTermText().toLowerCase());
 								filterStream.previous();
 								if (filterStream.hasPrevious())
 									currToken = filterStream.previous();
 								currToken.setTermText(currToken.getTermText().toLowerCase());
-								if (filterStream.hasPrevious())
-									currToken = filterStream.previous();
-								currToken.setTermText(currToken.getTermText().toLowerCase());
-							}
+								
+							
 					}
 					else
 					{
@@ -79,6 +45,11 @@ public class CapitalizationFilter extends TokenFilter {
 					}
 					
 				}
+				else
+				{
+					currToken.setTermText(currToken.getTermText().toLowerCase());
+
+				}
 				
 				
 				
@@ -86,11 +57,15 @@ public class CapitalizationFilter extends TokenFilter {
 					filterStream.next();
 				if (filterStream.hasNext())
 					filterStream.next();
-				if (filterStream.hasNext())
-					filterStream.next();
+				
 							
 
 				
+			}
+			else
+			{
+				currToken.setTermText(currToken.getTermText().toLowerCase());
+
 			}
 
 		

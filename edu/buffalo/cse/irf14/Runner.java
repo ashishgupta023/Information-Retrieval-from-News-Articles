@@ -54,9 +54,9 @@ public class Runner {
 		
 		SearchRunner testSearch = new SearchRunner(indexDir, indexDir + File.separator + "snippets", 'Q', System.out);
 		
-		//testSearch.query("adobe", ScoringModel.TFIDF);
+		testSearch.query("place:washington AND government", ScoringModel.OKAPI);
 
-		while(true)
+		/*while(true)
 		{
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	        System.out.print("Enter Query : ");
@@ -69,12 +69,12 @@ public class Runner {
 			}
 	        System.out.println();
 		}
-		
+		*/
 		
 		//File file = new File(indexDir + File.separator + "input.txt");
 		//testSearch.query(file);
-		//QueryParser parser = new QueryParser();
-		//parser.parse("\"hello world\"" , "OR");
+		//Query query = QueryParser.parse("Author:\"Patti Domm\" AND american express", "OR");
+		//System.out.println(query.getEvalOrder());
 		//parser.parse("(black OR blue) AND bruises", "OR");
 		//parser.parse("Category:War AND Author:Dutt AND Place:Baghdad AND prisoners detainees rebels", "OR");
 		//parser.parse("(Love NOT War) AND Category:(movies NOT crime)", "OR");

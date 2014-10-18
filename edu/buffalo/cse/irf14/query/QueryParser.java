@@ -86,7 +86,14 @@ public class QueryParser {
 				 
 			}
 				String[] splitViaSpaces = userQueryVals[i].trim().split(" ");
-
+				for(int k =0 ; k < splitViaSpaces.length-1 ; k++)
+				{
+					if(splitViaSpaces[k].contains("\"") && splitViaSpaces[k+1].contains("\""))
+					{
+						splitViaSpaces[k] = splitViaSpaces[k] + splitViaSpaces[k+1];
+						splitViaSpaces[k+1] = "";
+					}
+				}
 				
 				
 				if( !userQueryVals[i].contains(checkNotContains) && !userQueryVals[i].contains("NOT") && !userQueryVals[i].contains("\""))
@@ -216,9 +223,19 @@ public class QueryParser {
                 
                 if(query[i] != '+' && query[i] != '#' && query[i] != '*' && query[i] != '(' && query[i] != ')' && query[i]!= ' ' )
                 {
-					while(i<query.length && query[i] != '+' && query[i] != '#' && query[i] != '*' & query[i] != '(' && query[i] != ')' && query[i]!= ' ')
+					while(i<query.length && query[i] != '+' && query[i] != '#' && query[i] != '*' & query[i] != '(' && query[i] != ')' &&  query[i]!= ' ' )
 					{
-		                buffer.append(query[i++]);
+
+						buffer.append(query[i++]);
+
+					}			
+					
+					if(userQuery.substring(i , userQuery.length()  ).contains("\""))
+					{
+						while( i<query.length && query[i] != '\"' )
+							buffer.append(query[i++]);
+						buffer.append("\"");
+						i++;
 					}
 					i--;
 					String pushValue = buffer.toString();
@@ -231,7 +248,7 @@ public class QueryParser {
 						}
 						else
 							pushValue = "Term:".concat(pushValue);					
-						}
+					}
 					queryStack.push(pushValue);
 					queryObject.updateEvalOrder(pushValue);
 

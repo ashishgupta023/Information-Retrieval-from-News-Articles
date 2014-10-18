@@ -400,7 +400,7 @@ public class IndexReader {
 	{
 		Map <String,  Map<String ,  ArrayList<Integer>>> tempResult = new HashMap<String,  Map<String ,  ArrayList<Integer>>>();
 		
-		if(temp1 != null && temp1.size() > 0)
+		if(temp1 != null && temp2 != null && temp1.size() > 0 && temp2.size() > 0 )
 		{
 		
 			for (Map.Entry<String,  Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
@@ -415,7 +415,7 @@ public class IndexReader {
 			}
 		}
 		
-		if(temp2 != null && temp2.size() > 0)
+		if(temp1 != null && temp1.size() > 0)
 		{
 			for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp1Entry : temp1.entrySet()) {
 					if (!tempResult.containsKey(temp1Entry.getKey())) {
@@ -426,16 +426,16 @@ public class IndexReader {
 			}
 		}
 		
-		if( temp1 != null && temp2 != null && temp1.size() > 0 && temp2.size() > 0)
+		if( temp2 != null && temp2.size() > 0)
 		{
 		
 		for (Map.Entry<String, Map<String ,  ArrayList<Integer>>> temp2Entry : temp2.entrySet()) {
 			if (!tempResult.containsKey(temp2Entry.getKey())) {
-				if (!temp2Entry.getKey().equals(temp2Entry.getKey())) {
+				
 					tempResult.put(temp2Entry.getKey(),
 							temp2Entry.getValue());
 				}
-			}
+			
 		}
 		}
 		
