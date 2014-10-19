@@ -10,9 +10,7 @@ import sun.awt.RepaintArea;
  *
  */
 public class Query {
-	/**
-	 * Method to convert given parsed query into string
-	 */
+	
 	
 	public String representation;
 	public LinkedList<String> evaluationOrder;
@@ -27,7 +25,9 @@ public class Query {
 	{
 		this.representation =  representation;
 	}
-	
+	/**
+	 * Method to convert given parsed query into string
+	 */
 	public String toString() {
 		
 		return representation;

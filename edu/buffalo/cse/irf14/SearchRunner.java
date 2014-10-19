@@ -51,6 +51,7 @@ public class SearchRunner {
 	private List<String[]> userQueryTerms ;
 	private  boolean isPhraseQuery;
 	IndexReader reader ;
+	String analyzedUserQuery;
 	
 	/**
 	 * Default (and only public) constuctor
@@ -81,12 +82,15 @@ public class SearchRunner {
 		//TODO: IMPLEMENT THIS METHOD
 		userQueryTerms = null;
 		isPhraseQuery = false;
+		analyzedUserQuery = "";
 		if(userQuery == null || userQuery.isEmpty() || model == null)
 		{
 			this.stream.print("Invalid Input");
 		}
 		else
 		{
+			try
+			{
 		Long startTime = System.currentTimeMillis();
 		Map<String, Map<String ,  ArrayList<Integer>>> result = evaluateQuery(userQuery);
 		Map<String, Double> rankedResult = new HashMap<String, Double>();
@@ -96,7 +100,7 @@ public class SearchRunner {
 			{
 				if(result != null)
 				{
-					rankedResult = computeVSMScores(userQueryTerms, userQuery, isPhraseQuery, result);
+					rankedResult = computeVSMScores(userQueryTerms, analyzedUserQuery, isPhraseQuery, result);
 				}
 				else
 					rankedResult = null;
@@ -106,7 +110,7 @@ public class SearchRunner {
 			{
 				if(result != null)
 				{
-					rankedResult = computeOKAPIScores(userQueryTerms, userQuery, isPhraseQuery, result);
+					rankedResult = computeOKAPIScores(userQueryTerms, analyzedUserQuery, isPhraseQuery, result);
 				}
 				else
 					rankedResult = null;
@@ -175,7 +179,11 @@ public class SearchRunner {
 		{
 			this.stream.println("-----The query returned zero results !!-----");
 		}
-		
+			}
+			catch(Exception e )
+			{
+				this.stream.println("------This system is currently incapable of processing your query-----");
+			}
 	
 		}
 	}
@@ -184,6 +192,7 @@ public class SearchRunner {
 	{
 		
 		isPhraseQuery = false;
+		analyzedUserQuery = "";
 		Map <String, Map<String ,  ArrayList<Integer>>> result = new LinkedHashMap<String, Map<String ,  ArrayList<Integer>>>();
 		Query query = QueryParser.parse(userQuery, "OR");
 		LinkedList<String> executeQuery = query.getEvalOrder();
@@ -197,8 +206,9 @@ public class SearchRunner {
 			String[] analyzedoperand = getAnalyzedTerm(operand);
 			if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand[0].toLowerCase() )
 				reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0].toUpperCase()));
-			userQueryTerms.add(analyzedoperand);
-			
+			if(!analyzedoperand[1].contains("<"))
+				userQueryTerms.add(analyzedoperand);
+			analyzedUserQuery = analyzedUserQuery.concat(analyzedoperand[1]).concat(" ");
 			
 			
 			if(userQuery.contains("\""))
@@ -239,12 +249,20 @@ public class SearchRunner {
 					{
 						String[] analyzedoperand1 = getAnalyzedTerm(operand1);
 						String[] analyzedoperand2 = getAnalyzedTerm(operand2)	;	
+						 analyzedUserQuery =  analyzedUserQuery.concat(analyzedoperand1[1]).concat(" ");
+						analyzedUserQuery = analyzedUserQuery.concat(analyzedoperand2[1]).concat(" ");
+
 						if(Arrays.equals(analyzedoperand1, analyzedoperand2))
-							userQueryTerms.add(analyzedoperand1);
+						{
+							if(!analyzedoperand1[1].contains("<"))
+								userQueryTerms.add(analyzedoperand1);
+						}
 						else
 						{
-							userQueryTerms.add(analyzedoperand1);
-							userQueryTerms.add(analyzedoperand2);
+							if(!analyzedoperand1[1].contains("<"))
+								userQueryTerms.add(analyzedoperand1);
+							if(!analyzedoperand2[1].contains("<"))
+								userQueryTerms.add(analyzedoperand2);
 
 						}
 						if(analyzedoperand1[0].equals(analyzedoperand2[0]))
@@ -264,9 +282,21 @@ public class SearchRunner {
 							{
 								if(analyzedoperand1[1].contains("<") || analyzedoperand2[1].contains("<"))
 								{
-									result = reader.notPostings(reader.getPostingsWithPosIndexes(analyzedoperand1[1].replace("<", "").replace(">", "")),
-											reader.getPostingsWithPosIndexes(analyzedoperand2[1].replace("<", "").replace(">", "")));
-								}
+									if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand1[0].toLowerCase() )
+										reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand1[0].toUpperCase()));
+									
+									result = reader.getPostingsWithPosIndexes(analyzedoperand1[1].replace("<", "").replace(">", ""));
+									
+									if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand2[0].toLowerCase() )
+										reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand2[0].toUpperCase()));
+								
+									Map <String, Map<String, ArrayList<Integer>>> tempresult = null;
+
+									
+									tempresult = reader.getPostingsWithPosIndexes(analyzedoperand2[1].replace("<", "").replace(">", ""));
+									
+									result = reader.notPostings(result , tempresult	);
+										}
 								else
 								{
 									
@@ -281,12 +311,23 @@ public class SearchRunner {
 						{
 							if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand1[0].toLowerCase() )
 								reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand1[0].toUpperCase()));
-							result = reader.getPostingsWithPosIndexes(analyzedoperand1[1]);
+							if(analyzedoperand1[1].trim().contains(" "))	
+								result = processPhraseQuery(userQuery, analyzedoperand1, reader);
+							else
+								result = reader.getPostingsWithPosIndexes(analyzedoperand1[1]);
+
 							if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand2[0].toLowerCase() )
 								reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand2[0].toUpperCase()));
-							Map <String, Map<String, ArrayList<Integer>>> tempresult = reader.getPostingsWithPosIndexes(analyzedoperand2[1]);
+							
+							Map <String, Map<String, ArrayList<Integer>>> tempresult = null;
+							
+							if(analyzedoperand2[1].trim().contains(" "))
+								tempresult = processPhraseQuery(userQuery, analyzedoperand2, reader);
+							else
+								tempresult = reader.getPostingsWithPosIndexes(analyzedoperand2[1]);
 							if(operator.trim().equals("#"))
 							{
+								
 								result = reader.unionPostings(result, tempresult);
 								if(executeQuery.size() != 0)
 									iter.add("--RESULT--");	
@@ -295,8 +336,17 @@ public class SearchRunner {
 							{
 								if(analyzedoperand1[1].contains("<") || analyzedoperand2[1].contains("<"))
 								{
-									result = reader.notPostings(reader.getPostingsWithPosIndexes(analyzedoperand1[1].replace("<", "").replace(">", "")),
-											reader.getPostingsWithPosIndexes(analyzedoperand2[1].replace("<", "").replace(">", "")));
+									if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand1[0].toLowerCase() )
+										reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand1[0].toUpperCase()));
+									
+									result = reader.getPostingsWithPosIndexes(analyzedoperand1[1].replace("<", "").replace(">", ""));
+									
+									if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand2[0].toLowerCase() )
+										reader = new IndexReader(indexDir , IndexType.valueOf(analyzedoperand2[0].toUpperCase()));
+								
+									tempresult = reader.getPostingsWithPosIndexes(analyzedoperand2[1].replace("<", "").replace(">", ""));
+									
+									result = reader.notPostings(result , tempresult	);
 									if(executeQuery.size() != 0)
 										iter.add("--RESULT--");	
 								}
@@ -322,15 +372,27 @@ public class SearchRunner {
 							analyzedoperand = getAnalyzedTerm(operand1);
 							
 						}
-						
+						analyzedUserQuery = analyzedUserQuery.concat(analyzedoperand[1]).concat(" ");
+
 						if(!Arrays.equals(userQueryTerms.get(userQueryTerms.size()-1), analyzedoperand))
-							userQueryTerms.add(analyzedoperand);
-						
+						{
+							if(!analyzedoperand[1].contains("<"))
+								userQueryTerms.add(analyzedoperand);
+						}
 						if(reader == null || reader.getType().toString().toLowerCase() != analyzedoperand[0].toLowerCase() )
 							reader = new IndexReader(indexDir, IndexType.valueOf(analyzedoperand[0].toUpperCase()));
+						Map <String, Map<String, ArrayList<Integer>>> tempresult = null;
+						
+						if(analyzedoperand[1].trim().contains(" "))
+							tempresult = processPhraseQuery(userQuery, analyzedoperand, reader);
+						else
+							tempresult = reader.getPostingsWithPosIndexes(analyzedoperand[1]);
+						
+						
 						if(operator.trim().equals("#"))
 						{
-							result = reader.unionPostings(result, reader.getPostingsWithPosIndexes(analyzedoperand[1]));
+							
+							result = reader.unionPostings(result, tempresult);
 							if(executeQuery.size() != 0)
 								iter.add("--RESULT--");	
 						}
@@ -345,7 +407,7 @@ public class SearchRunner {
 							}
 							else
 							{
-								result = reader.intersectPostings(result, reader.getPostingsWithPosIndexes(analyzedoperand[1]));
+								result = reader.intersectPostings(result, tempresult);
 								if(executeQuery.size() != 0)
 									iter.add("--RESULT--");	
 							}
@@ -361,7 +423,11 @@ public class SearchRunner {
 	}
 	public Map<String, Map<String, ArrayList<Integer>>> processPhraseQuery(String userQuery , String[] analyzedPhraseOperand , IndexReader reader)
 	{
-		String[] phraseTokens = analyzedPhraseOperand[1].split(" ");
+		String[] phraseTokens = null;
+		if(analyzedPhraseOperand[1].contains(" "))
+			phraseTokens = analyzedPhraseOperand[1].replaceAll("\"", "").split(" ");
+		else
+			phraseTokens[0] = analyzedPhraseOperand[1].replaceAll("\"", "");
 		
 		Map<String, Map<String, ArrayList<Integer>>> phraseQueryTempResult = new HashMap<String, Map<String,ArrayList<Integer>>>();
 		Map<String, Map<String, ArrayList<Integer>>> phraseQueryResult = new HashMap<String, Map<String,ArrayList<Integer>>>();
@@ -527,7 +593,7 @@ public class SearchRunner {
 					
 					int N = reader.getTotalValueTerms();
 					Map<String, Map<String, ArrayList<Integer>>> postings = new HashMap<String, Map<String,ArrayList<Integer>>>();;
-					if(isPhraseQuery)
+					if(qTerm[1].trim().contains(" "))
 					{
 						postings = processPhraseQuery(userQuery, qTerm, reader);
 					}
@@ -539,12 +605,12 @@ public class SearchRunner {
 					int dfTerm = 1 ;
 					if(postings!=null)
 						dfTerm = postings.size();
-					
-					weightTerminQ[i] = (tfqTerm) * (Math.log(N/dfTerm)); //For Query Vector:  tf, idf weighting (log (N/df))  , cosine normalization
+					//System.out.println( Math.log(tfqTerm) + " :" + Math.log(N/dfTerm) );
+					weightTerminQ[i] = (1+Math.log(tfqTerm)) * (Math.log(N/dfTerm)); //For Query Vector: log weighted tf, idf weighting (log (N/df))  , cosine normalization
 					
 					 forwardIndex = reader.readForwardIndex();
 
-					//For Document Vector :  tf , no idf, cosine normalization
+					//For Document Vector : log weighted tf , no idf, cosine normalization
 					for(Map.Entry<String, Map<String, ArrayList<Integer>>> entry : unrankedResult.entrySet())
 					{
 						String fileID = entry.getKey();
@@ -554,8 +620,15 @@ public class SearchRunner {
 						
 						if(docResult.containsKey(qTerm[1]))
 						{
-							 wfTD = wfTD +   forwardIndex.get(fileID).get(qTerm[1]);
-							 //System.out.println(wfTD);
+							if(qTerm[1].trim().contains(" "))
+							{
+								 wfTD = 1 + Math.log(   docResult.get(qTerm[1]).size());
+							}
+							else
+							{
+							 wfTD = 1 + Math.log(   forwardIndex.get(fileID).get(qTerm[1]));
+							}
+							 //System.out.println( forwardIndex.get(fileID).get(qTerm[1]) + " : " + wfTD);
 						}
 						if(scores.containsKey(fileID))
 						{
@@ -581,9 +654,9 @@ public class SearchRunner {
 					
 					for (Map.Entry<String, Integer> terms : termsInDoc.entrySet())
 					{
-						sumSquares = sumSquares + Math.pow(terms.getValue() , 2);
+						sumSquares = sumSquares + Math.pow(1 + Math.log(terms.getValue()) , 2);
 					}
-					normalizationForD.put(entry.getKey(), Math.sqrt(sumSquares ));
+					normalizationForD.put(fileID, Math.sqrt(sumSquares));
 					
 				}
 				Double normalizationQ = 0.0;
@@ -632,10 +705,14 @@ public class SearchRunner {
 		{
 			Map<String , Map<String, Integer>> forwardIndex  = null;
 		HashMap<String, Double> rankedResult = new LinkedHashMap<String, Double>();
+		HashMap<String, Integer > docLengths = new HashMap<String, Integer>();
 		Map<String, Double> scores = new HashMap<String, Double>(); // fileID, scores
 		double oKapiK1 = 1.2; // document term frequency scaling calibration
-		double oKapiK3 = 1.2; // query term frequency calibration - Use for long queries
+		double oKapiK3 = 1.5; // query term frequency calibration - Use for long queries
 		double oKapiB = 0.75; // scaling term weight by document length
+		
+		Double[] weightTerminQ = new Double[userQueryTerms.size()];
+
 		 for(int i = 0 ; i < userQueryTerms.size() ; i++)
 		 {
 			 	String[] qTerm = userQueryTerms.get(i);
@@ -651,54 +728,108 @@ public class SearchRunner {
 					}
 					
 				}
+				
+				
 				if(reader == null || reader.getType().toString().toLowerCase() != qTerm[0].toLowerCase() )
 					reader = new IndexReader(indexDir , IndexType.valueOf(qTerm[0].toUpperCase()));
 				
 				int N = reader.getTotalValueTerms();
 				Map<String, Map<String, ArrayList<Integer>>> postings = new HashMap<String, Map<String,ArrayList<Integer>>>();
-				if(isPhraseQuery)
+				
+				if(qTerm[1].trim().contains(" "))
 				{
-					 postings = processPhraseQuery(userQuery, qTerm, reader);
+					postings = processPhraseQuery(userQuery, qTerm, reader);
 				}
 				else
 				{
-					postings = reader.getPostingsWithPosIndexes(qTerm[1]);
+					 postings = reader.getPostingsWithPosIndexes(qTerm[1]);
+
 				}
-				int dfTerm = postings.size();
-				Double iDFt = Math.log(N/dfTerm);
+				int dfTerm = 0;
+				if(postings != null)
+					dfTerm = postings.size();
+				Double iDFt = Math.log(N/(dfTerm + 0.5 ));
 				Double avgDocLength = reader.getAverageDocumentLength();
 				//Map<String , Map <String , Integer>> forwardIndex = reader.readForwardIndex();
 				forwardIndex = reader.readForwardIndex();
+				
+				weightTerminQ[i] =( (oKapiK3 + 1) * tfqTerm )/ (oKapiK3 + tfqTerm);
 				for(Map.Entry<String, Map<String, ArrayList<Integer>>> entry : unrankedResult.entrySet())
 				{
 					String fileID = entry.getKey();
 					Map <String , ArrayList<Integer>> docResult = entry.getValue();
 					double tfTD = 0.0;
-					
-					
 					if(docResult.containsKey(qTerm[1]))
 					{
-						tfTD = forwardIndex.get(fileID).get(qTerm[1]);
+						if(qTerm[1].trim().contains(" "))
+						{
+							 tfTD =   docResult.get(qTerm[1]).size();
+						}
+						else
+						{
+							tfTD =   forwardIndex.get(fileID).get(qTerm[1]);
+						}
+						 //System.out.println( forwardIndex.get(fileID).get(qTerm[1]) + " : " + wfTD);
 					}
 					
-					int docLength = reader.getDocumentLength(fileID);
-					Double oKapiScoreNumerator = ((oKapiK1+1) * tfTD) * (oKapiK3 + 1) * tfqTerm;
-					Double oKapiScoreDenominator = ( (oKapiK1 *( (1-oKapiB) + (oKapiB * ( docLength / avgDocLength)  )) ) + tfTD ) * (oKapiK3 + tfqTerm) ;
 					
-					Double dRSV = (iDFt * oKapiScoreNumerator) / oKapiScoreDenominator; //RSVd - Retrieval Status Value
+					
+					int docLength = reader.getDocumentLength(fileID);
+					docLengths.put(fileID, docLength);
+					Double oKapiScoreNumerator = ((oKapiK1+1) * tfTD)  ;
+					Double oKapiScoreDenominator = ( (oKapiK1 *( (1-oKapiB) + (oKapiB * ( docLength / avgDocLength)  )) ) + tfTD )   ;
+					
+					Double dRSVQ = (iDFt * oKapiScoreNumerator * weightTerminQ[i]) / oKapiScoreDenominator; 
 					
 					if(scores.containsKey(fileID))
 					{
 						
-						scores.put(fileID, scores.get(fileID) + dRSV );
+						scores.put(fileID, scores.get(fileID) + dRSVQ );
 					}
 					else
 					{
-						scores.put(fileID, dRSV );
+						scores.put(fileID, dRSVQ );
 					}
+					
+					
 				}
 				
+				
 		}
+		 
+		 	Map<String, Double> normalizationForD = new HashMap<String, Double>();
+		 	double avgDoclength = reader.getAverageDocumentLength();
+			//Normalization factors for each of document 
+			for (Map.Entry<String , Map <String , ArrayList<Integer>>> entry : unrankedResult.entrySet())
+			{
+				String fileID = entry.getKey();
+				
+				Map<String, Integer> termsInDoc = forwardIndex.get(fileID);
+				
+				Double sumSquares = 0.0 ;
+				
+				for (Map.Entry<String, Integer> terms : termsInDoc.entrySet())
+				{
+					sumSquares = sumSquares + Math.pow( ((oKapiK1 + 1 ) * terms.getValue()) /
+							( oKapiK1 * ( 1 - oKapiB + oKapiB * (docLengths.get(fileID)/avgDoclength)) + terms.getValue() ) , 2);
+				}
+				normalizationForD.put(fileID, Math.sqrt(sumSquares));
+				
+			}
+			
+			Double normalizationQ = 0.0;
+			
+			for(int i = 0; i< weightTerminQ.length ; i++)
+			{
+				normalizationQ = normalizationQ + Math.pow(weightTerminQ[i],2);
+			}
+			normalizationQ = Math.sqrt(normalizationQ);
+			
+			for(Map.Entry<String, Double> entry : scores.entrySet())
+			{
+				Double finalScore = entry.getValue() / (normalizationForD.get(entry.getKey()) * normalizationQ * 2)  ;
+				scores.put(entry.getKey(), finalScore);
+			}
 	
 			List<Entry<String, Double>> unrankedOutput = new LinkedList<Map.Entry<String, Double>>(
 					scores.entrySet());
@@ -843,7 +974,7 @@ public class SearchRunner {
 						{
 							if(result != null)
 							{
-								rankedResult = computeVSMScores(userQueryTerms, query.getValue(), isPhraseQuery, result);
+								rankedResult = computeVSMScores(userQueryTerms, analyzedUserQuery, isPhraseQuery, result);
 							}
 							else
 								rankedResult = null;
@@ -853,7 +984,7 @@ public class SearchRunner {
 						{
 							if(result != null)
 							{
-								rankedResult = computeOKAPIScores(userQueryTerms, query.getValue(), isPhraseQuery, result);
+								rankedResult = computeOKAPIScores(userQueryTerms, analyzedUserQuery, isPhraseQuery, result);
 							}
 							else
 								rankedResult = null;

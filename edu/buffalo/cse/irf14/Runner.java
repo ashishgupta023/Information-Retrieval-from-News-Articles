@@ -3,16 +3,15 @@
  */
 package edu.buffalo.cse.irf14;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 
-import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
+import edu.buffalo.cse.irf14.document.Parser;
+import edu.buffalo.cse.irf14.document.ParserException;
 import edu.buffalo.cse.irf14.index.IndexWriter;
+import edu.buffalo.cse.irf14.index.IndexerException;
 
 /**
  * @author nikhillo
@@ -44,17 +43,17 @@ public class Runner {
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
 		long time = System.currentTimeMillis();
-		PrintStream fileOutputStream  = null; 
+		/*PrintStream fileOutputStream  = null; 
 		try {
 			 fileOutputStream = new PrintStream(new File(indexDir + File.separator + "output"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
-		SearchRunner testSearch = new SearchRunner(indexDir, indexDir + File.separator + "snippets", 'Q', System.out);
+		//SearchRunner testSearch = new SearchRunner(indexDir, indexDir + File.separator + "snippets", 'Q', fileOutputStream);
 		
-		testSearch.query("place:washington AND government", ScoringModel.OKAPI);
+		//testSearch.query("Author:\"Patti Domm\"", ScoringModel.OKAPI);
 
 		/*while(true)
 		{
@@ -62,14 +61,14 @@ public class Runner {
 	        System.out.print("Enter Query : ");
 	        try {
 				String s = br.readLine();
-				testSearch.query(s, ScoringModel.TFIDF);
+				testSearch.query(s, ScoringModel.OKAPI);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	        System.out.println();
-		}
-		*/
+		}*/
+		
 		
 		//File file = new File(indexDir + File.separator + "input.txt");
 		//testSearch.query(file);
@@ -85,7 +84,7 @@ public class Runner {
 		for (String key : res.keySet()) {
 		    System.out.println(key + " : " + res.get(key));
 		}
-		*//* try {
+		*/ try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
@@ -113,7 +112,7 @@ public class Runner {
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} */
+		} 
 	}  
 
 }
